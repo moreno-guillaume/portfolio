@@ -1,4 +1,3 @@
-/* Test bidon, possiblement passe phpstan level=6 */
 <?php
 
 declare(strict_types=1);
