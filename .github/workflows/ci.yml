@@ -1,0 +1,39 @@
+name: CI
+
+on:
+    push:
+        branches: [ main, develop ]
+    pull_request:
+        branches: [ main, develop ]
+
+jobs:
+    quality:
+        runs-on: ubuntu-latest
+        
+        steps:
+        - uses: actions/checkout@v4
+        
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+              php-version: '8.2'
+              extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+              coverage: xdebug
+        
+        - name: Cache Composer packages
+          uses: actions/cache@v3
+          with:
+              path: ~/.composer/cache/files
+              key: composer-${{ hashFiles('composer.lock') }}
+        
+        - name: Install dependencies
+          run: composer install --prefer-dist --no-progress
+        
+        - name: Run PHP CS Fixer
+          run: composer cs-check
+        
+        - name: Run PHPStan
+          run: composer phpstan
+        
+        - name: Run tests
+          run: php bin/phpunit --coverage-text
