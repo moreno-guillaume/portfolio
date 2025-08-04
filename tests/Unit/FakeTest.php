@@ -1,3 +1,4 @@
+/* Test bidon, possiblement passe phpstan level=6 */
 <?php
 
 declare(strict_types=1);
@@ -8,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 
 final class FakeTest extends TestCase
 {
-    public function testNothing(): void
+    public function testAddition(): void
     {
-        $this->assertTrue(true);
+        $this->assertEquals(4, 2 + 2);
     }
 }
