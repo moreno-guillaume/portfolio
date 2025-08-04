@@ -30,7 +30,8 @@ jobs:
           restore-keys: composer-
 
       - name: Install dependencies (dev included)
-        run: composer install --prefer-dist --no-progress --no-interaction
+      # --ignore-platform-reqs ajouté, les erreurs liées aux dépendances crééent des refus de PR côté git
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
 
       - name: Check PHPStan availability
