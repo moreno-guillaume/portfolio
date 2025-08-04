@@ -1,13 +1,11 @@
-﻿<?php
+<?php
 
 namespace App\Controller;
 
 class TestController
 {
-    public function test()
+    public function test(): string
     {
-        if (true) {
-            return 'test'   ;
-        }
+        return 'test';
     }
 }
