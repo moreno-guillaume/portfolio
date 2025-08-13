@@ -76,39 +76,108 @@ createAnimatedPoints() {
     // Vider le tableau
     this.points = [];
     
-    // Nombre de points à créer
-    const pointCount = 10;
+    // Paramètres de placement
+    const margin = 50; // Marge depuis les bords
+    const cornerSize = 200; // Taille de la zone des coins
     
-    console.log('Génération de points aléatoires...');
+    console.log('Génération de points avec placement stratégique...');
     
-    // Créer les points avec positions aléatoires
-    for (let i = 0; i < pointCount; i++) {
-        const point = {
-            // Positions aléatoires dans le canvas
-            baseX: Math.random() * this.canvas.width,
-            baseY: Math.random() * this.canvas.height,
-            x: 0, //  calculée dans updatePoints()
-            y: 0, //  calculée dans updatePoints()
-            
-            // Taille aléatoire (2 à 5 pixels)
-            size: Math.random() * 3 + 2,
-            
-            // Vitesse d'animation aléatoire (0.5 à 1.2)
-            speed: Math.random() * 0.7 + 0.5,
-            
-            // Phases aléatoires pour le mouvement
-            phaseX: Math.random() * Math.PI * 2,
-            phaseY: Math.random() * Math.PI * 2
-        };
-        
-        // Initialiser les positions x,y avec les positions de base
-        point.x = point.baseX;
-        point.y = point.baseY;
-        
-        this.points.push(point);
+    // === 1. AMAS OBLIGATOIRES DANS LES COINS SUPÉRIEURS ===
+    
+    // Coin supérieur gauche (2-3 points)
+    const topLeftCount = Math.floor(Math.random() * 2) + 2; // 2 ou 3 points
+    for (let i = 0; i < topLeftCount; i++) {
+        this.points.push(this.createPoint(
+            margin + Math.random() * cornerSize,           // x: margin à margin+200
+            margin + Math.random() * cornerSize,           // y: margin à margin+200
+            'coin supérieur gauche'
+        ));
     }
     
-    console.log(`${this.points.length} points aléatoires créés`);
+    // Coin supérieur droit (2-3 points)  
+    const topRightCount = Math.floor(Math.random() * 2) + 2; // 2 ou 3 points
+    for (let i = 0; i < topRightCount; i++) {
+        this.points.push(this.createPoint(
+            this.canvas.width - margin - cornerSize + Math.random() * cornerSize,  // x: depuis la droite
+            margin + Math.random() * cornerSize,                                   // y: margin à margin+200
+            'coin supérieur droit'
+        ));
+    }
+    
+    // === 2. POINTS SUR LES BORDS D'ÉCRAN ===
+    
+    // Bord gauche (2 points)
+    for (let i = 0; i < 2; i++) {
+        this.points.push(this.createPoint(
+            margin + Math.random() * 50,                    // x: près du bord gauche
+            margin + Math.random() * (this.canvas.height - 2 * margin), // y: toute la hauteur
+            'bord gauche'
+        ));
+    }
+    
+    // Bord droit (2 points)
+    for (let i = 0; i < 2; i++) {
+        this.points.push(this.createPoint(
+            this.canvas.width - margin - 50 + Math.random() * 50,      // x: près du bord droit
+            margin + Math.random() * (this.canvas.height - 2 * margin), // y: toute la hauteur
+            'bord droit'
+        ));
+    }
+    
+    // Bord supérieur (1-2 points)
+    const topBorderCount = Math.floor(Math.random() * 2) + 1; // 1 ou 2 points
+    for (let i = 0; i < topBorderCount; i++) {
+        this.points.push(this.createPoint(
+            margin + Math.random() * (this.canvas.width - 2 * margin),  // x: toute la largeur
+            margin + Math.random() * 50,                                // y: près du bord supérieur
+            'bord supérieur'
+        ));
+    }
+    
+    // Bord inférieur (1-2 points)
+    const bottomBorderCount = Math.floor(Math.random() * 2) + 1; // 1 ou 2 points
+    for (let i = 0; i < bottomBorderCount; i++) {
+        this.points.push(this.createPoint(
+            margin + Math.random() * (this.canvas.width - 2 * margin),   // x: toute la largeur
+            this.canvas.height - margin - 50 + Math.random() * 50,       // y: près du bord inférieur
+            'bord inférieur'
+        ));
+    }
+    
+    // === 3. POINTS ALÉATOIRES AU CENTRE ===
+    
+    // Compléter avec des points aléatoires pour avoir ~15 points au total
+    const currentCount = this.points.length;
+    const targetTotal = 55;
+    const randomPointsToAdd = Math.max(0, targetTotal - currentCount);
+    
+    for (let i = 0; i < randomPointsToAdd; i++) {
+        this.points.push(this.createPoint(
+            margin + Math.random() * (this.canvas.width - 2 * margin),   // x: dans la zone centrale
+            margin + Math.random() * (this.canvas.height - 2 * margin),  // y: dans la zone centrale
+            'centre aléatoire'
+        ));
+    }
+    
+    console.log(`${this.points.length} points créés avec placement stratégique`);
+    console.log(`- Coins supérieurs: ${topLeftCount + topRightCount} points`);
+    console.log(`- Bords: ${4 + topBorderCount + bottomBorderCount} points`);
+    console.log(`- Centre aléatoire: ${randomPointsToAdd} points`);
+}
+
+// Fonction helper pour créer un point
+createPoint(x, y, zone = 'aléatoire') {
+    return {
+        baseX: x,
+        baseY: y,
+        x: x,
+        y: y,
+        size: Math.random() * 3 + 2,                    // 2 à 5 pixels
+        speed: Math.random() * 0.7 + 0.5,               // 0.5 à 1.2
+        phaseX: Math.random() * Math.PI * 2,            // 0 à 2π
+        phaseY: Math.random() * Math.PI * 2,            // 0 à 2π
+        zone: zone // Pour debug (optionnel)
+    };
 }
 
    setupMouseEvents() {
