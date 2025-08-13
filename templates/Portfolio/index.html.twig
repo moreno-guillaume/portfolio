@@ -1,11 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MorenoDev{% endblock %}
+{% block title %}Portfolio{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('css/reset.css') }}">
-<link rel="stylesheet" href="{{ asset('css/network.css') }}">
-    
+    <link rel="stylesheet" href="{{ asset('css/network.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -18,5 +16,11 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/network.js') }}"></script>
+    <!-- Modules background -->
+    <script src="{{ asset('js/background/canvas-manager.js') }}"></script>
+    <script src="{{ asset('js/background/point-generator.js') }}"></script>
+    <script src="{{ asset('js/background/network.js') }}"></script>
+    
+    <!-- Point d'entrée principal -->
+    <script src="{{ asset('js/index.js') }}"></script>
 {% endblock %}
