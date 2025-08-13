@@ -25,6 +25,12 @@ class NetworkBackground {
         this.animationId = null;
         this.startTime = Date.now();
 
+            // Position de la souris
+        this.mouse = { x: 0, y: 0 };
+        // influences suggérées par l'ia, à contrôler
+        this.mouseInfluenceRadius = 120;
+        this.mouseInfluenceStrength = 30;
+
         // Appel d'init
         this.init();
     }
@@ -33,10 +39,12 @@ class NetworkBackground {
     {
         this.setupCanvas();
         this.createAnimatedPoints();
+        this.setupMouseEvents();
         this.startAnimation();
-        this.draw();
         this.setupEvents();
+        this.draw();
     }
+
 
     setupCanvas()
     {
@@ -81,6 +89,16 @@ class NetworkBackground {
         console.log(`${this.points.length} points animés créés`);
     }
 
+   setupMouseEvents() {
+        // Suivre le mouvement de la souris
+        document.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+        
+        console.log('Événements souris configurés');
+    }
+
         updatePoints() {
         const time = (Date.now() - this.startTime) * 0.001; // Temps en secondes
         
@@ -88,10 +106,35 @@ class NetworkBackground {
             // Mouvement organique lent avec des sinus/cosinus
             const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
             const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
+
+            // Calcul de l'influence de la souris
+            const dx = this.mouse.x - point.baseX;
+            const dy = this.mouse.y - point.baseY;
+            const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
             
-            // Nouvelle position = position de base + offset d'animation
-            point.x = point.baseX + offsetX;
-            point.y = point.baseY + offsetY;
+            let mouseOffsetX = 0;
+            let mouseOffsetY = 0;
+            
+       // Si la souris est dans la zone d'influence
+            if (distanceToMouse < this.mouseInfluenceRadius) {
+                // Calcul de l'influence (1 = max, 0 = aucune)
+                const influence = 1 - (distanceToMouse / this.mouseInfluenceRadius);
+                
+                // Direction pour "repousser" le point (effet magnétique inversé)
+                const angle = Math.atan2(dy, dx);
+                
+                // Force de répulsion
+                const forceX = Math.cos(angle) * influence * this.mouseInfluenceStrength;
+                const forceY = Math.sin(angle) * influence * this.mouseInfluenceStrength;
+                
+                // Appliquer l'effet (répulsion = - force)
+                mouseOffsetX = -forceX;
+                mouseOffsetY = -forceY;
+            }
+            
+            // Position finale = base + animation + effet souris
+            point.x = point.baseX + offsetX + mouseOffsetX;
+            point.y = point.baseY + offsetY + mouseOffsetY; 
         });
     }
 
@@ -112,19 +155,37 @@ class NetworkBackground {
                 // creation d'une connexion si les points sont suffisemment proches
                 if (distance < this.maxDistance) {
                     // Opacité basée sur la distance (plus proche = plus visible)
-                    const opacity = (1 - distance / this.maxDistance) * 0.5;
+                    let opacity = (1 - distance / this.maxDistance) * 0.5;
+
+            // Renforcer les lignes près de la souris
+                    const midX = (pointA.x + pointB.x) / 2;
+                    const midY = (pointA.y + pointB.y) / 2;
+                    const mouseDistanceToLine = Math.sqrt(
+                        (this.mouse.x - midX) ** 2 + (this.mouse.y - midY) ** 2
+                    );
+                    
+                    if (mouseDistanceToLine < this.mouseInfluenceRadius) {
+                        const mouseInfluence = 1 - (mouseDistanceToLine / this.mouseInfluenceRadius);
+                        opacity += mouseInfluence * 0.3; // Bonus d'opacité
+                    }
                     
                     this.connections.push({
                         from: i,
                         to: j,
-                        opacity: opacity
+                        opacity: Math.min(opacity, 0.8) // Cap à 0.8
                     });
                 }
             }
         }
-        
-        console.log(`${this.connections.length} connexions créées`);
     }
+
+
+
+
+
+
+
+
     draw()
     {
         // Effacer le canvas
