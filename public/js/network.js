@@ -72,22 +72,44 @@ class NetworkBackground {
         console.log(`${this.points.length} points créés`);
     }*/
 
-         createAnimatedPoints() {
-        // Créer 10 points avec position de base et paramètres d'animation
-        this.points = [
-            { baseX: 100, baseY: 100, x: 100, y: 100, size: 3, speed: 0.8, phaseX: 0, phaseY: 1 },
-            { baseX: 300, baseY: 150, x: 300, y: 150, size: 5, speed: 0.6, phaseX: 2, phaseY: 0.5 },
-            { baseX: 200, baseY: 250, x: 200, y: 250, size: 2, speed: 1.0, phaseX: 4, phaseY: 2 },
-            { baseX: 400, baseY: 200, x: 400, y: 200, size: 4, speed: 0.7, phaseX: 1, phaseY: 3 },
-            { baseX: 150, baseY: 350, x: 150, y: 350, size: 3, speed: 0.9, phaseX: 3, phaseY: 1.5 },
-            { baseX: 350, baseY: 300, x: 350, y: 300, size: 2, speed: 0.5, phaseX: 5, phaseY: 0 },
-            { baseX: 250, baseY: 400, x: 250, y: 400, size: 5, speed: 0.8, phaseX: 2.5, phaseY: 4 },
-            { baseX: 500, baseY: 250, x: 500, y: 250, size: 3, speed: 1.1, phaseX: 1.5, phaseY: 2.5 },
-            { baseX: 450, baseY: 400, x: 450, y: 400, size: 2, speed: 0.6, phaseX: 3.5, phaseY: 1 },
-            { baseX: 550, baseY: 150, x: 550, y: 150, size: 4, speed: 0.7, phaseX: 0.5, phaseY: 3.5 }
-        ];
-        console.log(`${this.points.length} points animés créés`);
+createAnimatedPoints() {
+    // Vider le tableau
+    this.points = [];
+    
+    // Nombre de points à créer
+    const pointCount = 10;
+    
+    console.log('Génération de points aléatoires...');
+    
+    // Créer les points avec positions aléatoires
+    for (let i = 0; i < pointCount; i++) {
+        const point = {
+            // Positions aléatoires dans le canvas
+            baseX: Math.random() * this.canvas.width,
+            baseY: Math.random() * this.canvas.height,
+            x: 0, //  calculée dans updatePoints()
+            y: 0, //  calculée dans updatePoints()
+            
+            // Taille aléatoire (2 à 5 pixels)
+            size: Math.random() * 3 + 2,
+            
+            // Vitesse d'animation aléatoire (0.5 à 1.2)
+            speed: Math.random() * 0.7 + 0.5,
+            
+            // Phases aléatoires pour le mouvement
+            phaseX: Math.random() * Math.PI * 2,
+            phaseY: Math.random() * Math.PI * 2
+        };
+        
+        // Initialiser les positions x,y avec les positions de base
+        point.x = point.baseX;
+        point.y = point.baseY;
+        
+        this.points.push(point);
     }
+    
+    console.log(`${this.points.length} points aléatoires créés`);
+}
 
    setupMouseEvents() {
         // Suivre le mouvement de la souris
