@@ -1,9 +1,10 @@
 // JavaScript pour l'animation réseau - Étape 2 : Points fixes
 
 
-// Création du canvas + points fixes ( pas d'aléatoire, pas d'anim ) 
+// Création du canvas + points fixes ( pas d'aléatoire, pas d'anim )
 class NetworkBackground {
-    constructor() {
+    constructor()
+    {
         this.canvas = document.getElementById('networkCanvas');
         if (!this.canvas) {
             // A voir par la suite
@@ -14,25 +15,28 @@ class NetworkBackground {
         this.ctx = this.canvas.getContext('2d');
         //Création du tableau
         this.points = [];
-        // Appel d'init 
+        // Appel d'init
         this.init();
     }
 
-    init() {
+    init()
+    {
         this.setupCanvas();
         this.createFixedPoints();
         this.draw();
         this.setupEvents();
     }
 
-    setupCanvas() {
+    setupCanvas()
+    {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         // A supprimer
         console.log(`Canvas : ${this.canvas.width}x${this.canvas.height}`);
     }
 
-    createFixedPoints() {
+    createFixedPoints()
+    {
         // 10 points de test
         this.points = [
             { x: 100, y: 100, size: 3 },
@@ -49,7 +53,8 @@ class NetworkBackground {
         console.log(`${this.points.length} points créés`);
     }
 
-    draw() {
+    draw()
+    {
         // Effacer le canvas
         this.ctx.fillStyle = '#F1F4F7';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -63,7 +68,8 @@ class NetworkBackground {
         });
     }
 
-    setupEvents() {
+    setupEvents()
+    {
         window.addEventListener('resize', () => {
             this.setupCanvas();
             this.draw();
