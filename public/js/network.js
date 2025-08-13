@@ -21,6 +21,10 @@ class NetworkBackground {
         // Distance max pour connecter deux points
         this.maxDistance = 200;
     
+         // Animation
+        this.animationId = null;
+        this.startTime = Date.now();
+
         // Appel d'init
         this.init();
     }
@@ -28,7 +32,8 @@ class NetworkBackground {
     init()
     {
         this.setupCanvas();
-        this.createFixedPoints();
+        this.createAnimatedPoints();
+        this.startAnimation();
         this.draw();
         this.setupEvents();
     }
@@ -41,7 +46,7 @@ class NetworkBackground {
         console.log(`Canvas : ${this.canvas.width}x${this.canvas.height}`);
     }
 
-    createFixedPoints()
+    /*createFixedPoints()
     {
         // 10 points de test
         this.points = [
@@ -57,6 +62,37 @@ class NetworkBackground {
             { x: 550, y: 150, size: 4 }
         ];
         console.log(`${this.points.length} points créés`);
+    }*/
+
+         createAnimatedPoints() {
+        // Créer 10 points avec position de base et paramètres d'animation
+        this.points = [
+            { baseX: 100, baseY: 100, x: 100, y: 100, size: 3, speed: 0.8, phaseX: 0, phaseY: 1 },
+            { baseX: 300, baseY: 150, x: 300, y: 150, size: 5, speed: 0.6, phaseX: 2, phaseY: 0.5 },
+            { baseX: 200, baseY: 250, x: 200, y: 250, size: 2, speed: 1.0, phaseX: 4, phaseY: 2 },
+            { baseX: 400, baseY: 200, x: 400, y: 200, size: 4, speed: 0.7, phaseX: 1, phaseY: 3 },
+            { baseX: 150, baseY: 350, x: 150, y: 350, size: 3, speed: 0.9, phaseX: 3, phaseY: 1.5 },
+            { baseX: 350, baseY: 300, x: 350, y: 300, size: 2, speed: 0.5, phaseX: 5, phaseY: 0 },
+            { baseX: 250, baseY: 400, x: 250, y: 400, size: 5, speed: 0.8, phaseX: 2.5, phaseY: 4 },
+            { baseX: 500, baseY: 250, x: 500, y: 250, size: 3, speed: 1.1, phaseX: 1.5, phaseY: 2.5 },
+            { baseX: 450, baseY: 400, x: 450, y: 400, size: 2, speed: 0.6, phaseX: 3.5, phaseY: 1 },
+            { baseX: 550, baseY: 150, x: 550, y: 150, size: 4, speed: 0.7, phaseX: 0.5, phaseY: 3.5 }
+        ];
+        console.log(`${this.points.length} points animés créés`);
+    }
+
+        updatePoints() {
+        const time = (Date.now() - this.startTime) * 0.001; // Temps en secondes
+        
+        this.points.forEach(point => {
+            // Mouvement organique lent avec des sinus/cosinus
+            const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
+            const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
+            
+            // Nouvelle position = position de base + offset d'animation
+            point.x = point.baseX + offsetX;
+            point.y = point.baseY + offsetY;
+        });
     }
 
     calculateConnections() {
@@ -117,12 +153,34 @@ class NetworkBackground {
         });
     }
 
-    setupEvents()
-    {
+     animate() {
+        this.updatePoints();
+        this.calculateConnections();
+        this.draw();
+        
+        // Programmer la prochaine frame
+        this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    startAnimation() {
+        console.log('Animation démarrée');
+        this.animate();
+    }
+
+    stopAnimation() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+     setupEvents() {
         window.addEventListener('resize', () => {
             this.setupCanvas();
-            this.calculateConnections(); // Recalculer si besoin
-            this.draw();
+        });
+        
+        // Arrêter l'animation si on quitte la page
+        window.addEventListener('beforeunload', () => {
+            this.stopAnimation();
         });
     }
 }
