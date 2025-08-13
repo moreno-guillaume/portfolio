@@ -1,9 +1,12 @@
 /**
  * Animation Réseau - Classe principale
  * Orchestrateur utilisant CanvasManager et PointGenerator
- * (Initialisé par App depuis index.js)
  */
-class NetworkBackground {
+
+import { CanvasManager } from './canvas-manager.js';
+import { PointGenerator } from './point-generator.js';
+
+export class NetworkBackground {
     constructor() {
         // Initialisation des modules
         this.canvasManager = new CanvasManager('networkCanvas');

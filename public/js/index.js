@@ -1,3 +1,12 @@
+/**
+ * Point d'entrée principal avec modules ES6
+ * public/js/index.js
+ */
+
+import { CanvasManager } from './background/canvas-manager.js';
+import { PointGenerator } from './background/point-generator.js';
+import { NetworkBackground } from './background/network.js';
+
 class App {
     constructor() {
         this.modules = {};
@@ -5,60 +14,46 @@ class App {
     }
 
     async init() {
+        console.log('🚀 Initialisation de l\'application...');
         
         try {
-            // Initialiser les différents modules
             await this.initBackgroundAnimation();
+            console.log('✅ Application initialisée avec succès');
             
         } catch (error) {
-            console.error('Erreur lors de l\'initialisation:', error);
+            console.error('❌ Erreur lors de l\'initialisation:', error);
         }
     }
 
     async initBackgroundAnimation() {
         try {
-            // Vérifier que toutes les classes background sont disponibles
-            if (typeof CanvasManager === 'undefined') {
-                throw new Error('CanvasManager non trouvé. Vérifiez que background/canvas-manager.js est chargé.');
-            }
-            if (typeof PointGenerator === 'undefined') {
-                throw new Error('PointGenerator non trouvé. Vérifiez que background/point-generator.js est chargé.');
-            }
-            if (typeof NetworkBackground === 'undefined') {
-                throw new Error('NetworkBackground non trouvé. Vérifiez que background/network.js est chargé.');
-            }
-
-            // Initialiser l'animation de background
             this.modules.backgroundAnimation = new NetworkBackground();
+            console.log('✅ Module background animation initialisé');
             
         } catch (error) {
-            console.error('Erreur module background:', error);
+            console.error('❌ Erreur module background:', error);
         }
     }
 
-    // Futures méthodes pour d'autres modules ici
-
-    // Méthode pour accéder aux modules depuis l'extérieur
     getModule(moduleName) {
         return this.modules[moduleName];
     }
 
-    // Méthode pour nettoyer les modules (avant navigation, etc.)
     destroy() {
         Object.values(this.modules).forEach(module => {
             if (module && typeof module.destroy === 'function') {
                 module.destroy();
             }
         });
+        console.log('🧹 Modules nettoyés');
     }
 }
 
-// Initialisation automatique au chargement du DOM
+// Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     window.App = new App();
 });
 
-// Nettoyage avant de quitter la page
 window.addEventListener('beforeunload', () => {
     if (window.App) {
         window.App.destroy();

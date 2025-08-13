@@ -2,7 +2,7 @@
  * Gestionnaire du Canvas
  * Responsabilité : Setup, redimensionnement, et rendu graphique
  */
-class CanvasManager {
+export class CanvasManager {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {

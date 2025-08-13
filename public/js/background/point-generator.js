@@ -2,7 +2,7 @@
  * Générateur de Points
  * Responsabilité : Génération, placement stratégique et mise à jour des points
  */
-class PointGenerator {
+export class PointGenerator {
     constructor(canvasWidth, canvasHeight) {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
@@ -23,7 +23,7 @@ class PointGenerator {
             baseY: y,
             x: x,
             y: y,
-            size: Math.random() * 3 + 2,                    // 2 à 5 pixels
+            size: Math.random() * 2 + 0.5,                    // 0.5 à 4 pixels
             speed: Math.random() * 0.7 + 0.5,               // 0.5 à 1.2
             phaseX: Math.random() * Math.PI * 2,            // 0 à 2π
             phaseY: Math.random() * Math.PI * 2,            // 0 à 2π
@@ -39,7 +39,7 @@ class PointGenerator {
         // === 1. AMAS OBLIGATOIRES DANS LES COINS SUPÉRIEURS ===
         
         // Coin supérieur gauche (2-3 points)
-        const topLeftCount = Math.floor(Math.random() * 2) + 2;
+        const topLeftCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topLeftCount; i++) {
             points.push(this.createPoint(
                 this.margin + Math.random() * this.cornerSize,
@@ -49,7 +49,7 @@ class PointGenerator {
         }
         
         // Coin supérieur droit (2-3 points)  
-        const topRightCount = Math.floor(Math.random() * 2) + 2;
+        const topRightCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topRightCount; i++) {
             points.push(this.createPoint(
                 this.canvasWidth - this.margin - this.cornerSize + Math.random() * this.cornerSize,
@@ -101,7 +101,7 @@ class PointGenerator {
         // === 3. POINTS ALÉATOIRES AU CENTRE ===
         
         const currentCount = points.length;
-        const targetTotal = 15;
+        const targetTotal = 185;
         const randomPointsToAdd = Math.max(0, targetTotal - currentCount);
         
         for (let i = 0; i < randomPointsToAdd; i++) {
