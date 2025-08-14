@@ -1,0 +1,46 @@
+/* CSS pour l'animation réseau - Étape 2 */
+
+/* Reset CSS basique */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Supprime les styles par défaut des liens */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Supprime les puces des listes */
+ul, ol {
+    list-style: none;
+}
+
+/* Canvas pour l'animation */
+#networkCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #F1F4F7;
+    z-index: -1;
+}
+
+.main-content {
+    position: relative;
+    z-index: 10;
+    padding: 50px;
+}
