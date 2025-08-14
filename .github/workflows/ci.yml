@@ -9,6 +9,10 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    # CORRECTION: Permissions nécessaires pour le push automatique
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
