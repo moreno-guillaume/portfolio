@@ -84,7 +84,7 @@ jobs:
           echo "Code nettoyé et committé avec succès"
 
       # Message de confirmation
-      - name: ✨ Cleaning summary
+      - name: Cleaning summary
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo "RÉSUMÉ DU NETTOYAGE AUTOMATIQUE"
@@ -106,7 +106,7 @@ jobs:
         run: php bin/phpunit --coverage-text
 
       # Message final pour les PR -> main
-      - name: 🎉 Ready for production
+      - name: Ready for production
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo ""
