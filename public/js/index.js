@@ -1,7 +1,4 @@
-/**
- * Point d'entrée principal avec modules ES6
- * public/js/index.js
- */
+
 
 import { CanvasManager } from './background/canvas-manager.js';
 import { PointGenerator } from './background/point-generator.js';
@@ -16,24 +13,18 @@ class App {
 
     async init()
     {
-        console.log('🚀 Initialisation de l\'application...');
-
         try {
             await this.initBackgroundAnimation();
-            console.log('✅ Application initialisée avec succès');
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation:', error);
-        }
+            } catch (error) {
+            }
     }
 
     async initBackgroundAnimation()
     {
         try {
             this.modules.backgroundAnimation = new NetworkBackground();
-            console.log('✅ Module background animation initialisé');
-        } catch (error) {
-            console.error('❌ Erreur module background:', error);
-        }
+            } catch (error) {
+            }
     }
 
     getModule(moduleName)
@@ -48,11 +39,10 @@ class App {
                 module.destroy();
             }
         });
-        console.log('🧹 Modules nettoyés');
-    }
+        }
 }
 
-// Initialisation
+
 document.addEventListener('DOMContentLoaded', () => {
     window.App = new App();
 });
