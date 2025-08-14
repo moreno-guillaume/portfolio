@@ -1,0 +1,15 @@
+#networkCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #F1F4F7;
+    z-index: -1;
+}
+
+.main-content {
+    position: relative;
+    z-index: 10;
+    padding: 50px;
+}

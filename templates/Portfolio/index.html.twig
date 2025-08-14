@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MorenoDev{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/network.css') }}">
+{% endblock %}
+
+{% block body %}
+    <canvas id="networkCanvas"></canvas>
+    
+    <div class="main-content">
+        <h1>Mon Portfolio</h1>
+        <p>Page en construction</p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="module" src="{{ asset('js/index.js') }}"></script>
+{% endblock %}
