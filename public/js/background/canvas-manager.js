@@ -1,7 +1,4 @@
-/**
- * Gestionnaire du Canvas
- * Responsabilité : Setup, redimensionnement, et rendu graphique
- */
+
 export class CanvasManager {
     constructor(canvasId)
     {
@@ -18,8 +15,7 @@ export class CanvasManager {
     {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
-        console.log(`Canvas configuré : ${this.canvas.width}x${this.canvas.height}`);
-    }
+        }
 
     getWidth()
     {
