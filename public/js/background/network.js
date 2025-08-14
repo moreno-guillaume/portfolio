@@ -1,7 +1,4 @@
-/**
- * Animation Réseau - Classe principale
- * Orchestrateur utilisant CanvasManager et PointGenerator
- */
+
 
 import { CanvasManager } from './canvas-manager.js';
 import { PointGenerator } from './point-generator.js';
@@ -9,20 +6,18 @@ import { PointGenerator } from './point-generator.js';
 export class NetworkBackground {
     constructor()
     {
-        // Initialisation des modules
+        
         this.canvasManager = new CanvasManager('networkCanvas');
         this.pointGenerator = new PointGenerator(
             this.canvasManager.getWidth(),
             this.canvasManager.getHeight()
         );
 
-        // État de l'animation
         this.points = [];
         this.connections = [];
         this.animationId = null;
         this.startTime = Date.now();
 
-        // Configuration
         this.maxDistance = 120;
         this.mouse = { x: 0, y: 0 };
         this.mouseInfluenceRadius = 120;
@@ -45,18 +40,17 @@ export class NetworkBackground {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
         });
-        console.log('Événements souris configurés');
-    }
+        }
 
     setupResizeEvents()
     {
         this.canvasManager.onResize(() => {
-            // Mettre à jour les dimensions dans le générateur
+            
             this.pointGenerator.updateCanvasDimensions(
                 this.canvasManager.getWidth(),
                 this.canvasManager.getHeight()
             );
-            // Regénérer les points pour la nouvelle taille
+            
             this.points = this.pointGenerator.generateStrategicPoints();
         });
     }
@@ -77,7 +71,6 @@ export class NetworkBackground {
                 if (distance < this.maxDistance) {
                     let opacity = (1 - distance / this.maxDistance) * 0.5;
 
-                    // Renforcer les lignes près de la souris
                     const midX = (pointA.x + pointB.x) / 2;
                     const midY = (pointA.y + pointB.y) / 2;
                     const mouseDistanceToLine = Math.sqrt(
@@ -101,7 +94,7 @@ export class NetworkBackground {
 
     animate()
     {
-        // Mettre à jour les positions des points
+        
         this.pointGenerator.updatePoints(
             this.points,
             this.startTime,
@@ -110,19 +103,15 @@ export class NetworkBackground {
             this.mouseInfluenceStrength
         );
 
-        // Recalculer les connexions
         this.calculateConnections();
 
-        // Dessiner
         this.canvasManager.draw(this.connections, this.points);
 
-        // Programmer la prochaine frame
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
     startAnimation()
     {
-        console.log('Animation démarrée');
         this.animate();
     }
 
@@ -134,10 +123,8 @@ export class NetworkBackground {
         }
     }
 
-    // Méthode destroy pour le nettoyage
     destroy()
     {
         this.stopAnimation();
-        console.log('🧹 Animation background nettoyée');
-    }
+        }
 }
