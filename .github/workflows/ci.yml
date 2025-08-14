@@ -13,10 +13,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        # 🧹 NOUVEAU : On récupère le token pour pouvoir push les modifications nettoyées
+        # On récupère le token pour pouvoir push les modifications nettoyées
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ref: ${{ github.head_ref }}  # CORRECTION: Évite le detached HEAD
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -39,7 +40,7 @@ jobs:
 
       # Nettoyage automatique du code (seulement pour PR vers main)
       # Supprime tous les commentaires et console.log avant le merge en production
-      - name: 🧹 Clean code automatically
+      - name: Clean code automatically
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo "Démarrage du nettoyage automatique"
@@ -51,9 +52,9 @@ jobs:
           php scripts/clean-code.php public/js/
           echo "Nettoyage du dossier public/css/"
           php scripts/clean-code.php public/css/
-          echo "✅ Nettoyage terminé !"
+          echo "Nettoyage terminé"
 
-      #Vérification des modifications après nettoyage
+      # Vérification des modifications après nettoyage
       # Si le script a modifié des fichiers, commit auto
       - name: Check if cleaning made changes
         if: github.event.pull_request.base.ref == 'main'
@@ -61,7 +62,7 @@ jobs:
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
-            echo "📝 Des modifications ont été apportées par le nettoyage automatique :"
+            echo "Des modifications ont été apportées par le nettoyage automatique :"
             git diff --stat
             echo ""
             echo "Aperçu des changements :"
@@ -71,20 +72,19 @@ jobs:
             echo "Aucune modification nécessaire"
           fi
 
-      #Commit automatique du code nettoyé
-      #Push les modifications directement dans la PR
+      # CORRECTION: Commit automatique du code nettoyé avec action spécialisée
+      # Push les modifications directement dans la PR
       - name: Commit cleaned code
         if: github.event.pull_request.base.ref == 'main' && steps.check_changes.outputs.changes == 'true'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "Code Cleaner Bot"
-          git add .
-          git commit -m "[Autofix]: suppression des commentaires et console.log pour la production"
-          git push
-          echo "Code nettoyé et committé avec succès"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[Autofix]: suppression des commentaires et console.log pour la production'
+          commit_user_name: 'Code Cleaner Bot'
+          commit_user_email: 'action@github.com'
+          commit_author: 'Code Cleaner Bot <action@github.com>'
 
       # Message de confirmation
-      - name: ✨ Cleaning summary
+      - name: Cleaning summary
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo "RÉSUMÉ DU NETTOYAGE AUTOMATIQUE"
@@ -106,7 +106,7 @@ jobs:
         run: php bin/phpunit --coverage-text
 
       # Message final pour les PR -> main
-      - name: 🎉 Ready for production
+      - name: Ready for production
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo ""
