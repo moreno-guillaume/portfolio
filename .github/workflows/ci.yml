@@ -13,6 +13,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        # 🧹 NOUVEAU : On récupère le token pour pouvoir push les modifications nettoyées
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -30,9 +34,64 @@ jobs:
           restore-keys: composer-
 
       - name: Install dependencies (dev included)
-      # --ignore-platform-reqs ajouté, les erreurs liées aux dépendances crééent des refus de PR côté git
+      # --ignore-platform-reqs ajouté, les erreurs liées aux dépendances créent des refus de PR côté git
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
+      # Nettoyage automatique du code (seulement pour PR vers main)
+      # Supprime tous les commentaires et console.log avant le merge en production
+      - name: 🧹 Clean code automatically
+        if: github.event.pull_request.base.ref == 'main'
+        run: |
+          echo "Démarrage du nettoyage automatique"
+          echo "Nettoyage du dossier src/"
+          php scripts/clean-code.php src/
+          echo "Nettoyage du dossier templates/"
+          php scripts/clean-code.php templates/
+          echo "Nettoyage du dossier public/js/"
+          php scripts/clean-code.php public/js/
+          echo "Nettoyage du dossier public/css/"
+          php scripts/clean-code.php public/css/
+          echo "✅ Nettoyage terminé !"
+
+      #Vérification des modifications après nettoyage
+      # Si le script a modifié des fichiers, commit auto
+      - name: Check if cleaning made changes
+        if: github.event.pull_request.base.ref == 'main'
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Des modifications ont été apportées par le nettoyage automatique :"
+            git diff --stat
+            echo ""
+            echo "Aperçu des changements :"
+            git diff --name-only
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "Aucune modification nécessaire"
+          fi
+
+      #Commit automatique du code nettoyé
+      #Push les modifications directement dans la PR
+      - name: Commit cleaned code
+        if: github.event.pull_request.base.ref == 'main' && steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Code Cleaner Bot"
+          git add .
+          git commit -m "[Autofix]: suppression des commentaires et console.log pour la production"
+          git push
+          echo "Code nettoyé et committé avec succès"
+
+      # Message de confirmation
+      - name: ✨ Cleaning summary
+        if: github.event.pull_request.base.ref == 'main'
+        run: |
+          echo "RÉSUMÉ DU NETTOYAGE AUTOMATIQUE"
+          echo "Suppression des commentaires de dev"
+          echo "Suppression des console.log"
+          echo "Code prêt pour prod"
+          echo "Passage aux vérifications de qualité"
 
       - name: Check PHPStan availability
         run: vendor/bin/phpstan --version
@@ -43,6 +102,18 @@ jobs:
       - name: Run PHPStan (verbose)
         run: composer phpstan -vvv
 
-
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
+
+      # Message final pour les PR -> main
+      - name: 🎉 Ready for production
+        if: github.event.pull_request.base.ref == 'main'
+        run: |
+          echo ""
+          echo "PRÊT POUR PROD"
+          echo "Code automatiquement nettoyé"
+          echo "Standards de code respectés (PHP CS Fixer)"
+          echo "Analyse statique passée (PHPStan)"
+          echo "Tests unitaires réussis (PHPUnit)"
+          echo ""
+          echo "PR OK pour merge vers main"
