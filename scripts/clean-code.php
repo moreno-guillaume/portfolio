@@ -10,39 +10,28 @@
 class CodeCleaner
 {
     private array $patterns = [
-        // JavaScript - console logs
         'js_console' => [
             '/console\.(log|warn|error|info|debug|trace|table|group|groupEnd|count|time|timeEnd)\s*\([^)]*\)\s*;?\s*\n?/m',
             '/console\.(log|warn|error|info|debug|trace|table|group|groupEnd|count|time|timeEnd)\s*\(`[^`]*`\)\s*;?\s*\n?/m',
         ],
-        
-        // JavaScript - commentaires
         'js_comments' => [
-            '/\/\/.*$/m',                    // Commentaires //
-            '/\/\*[\s\S]*?\*\//m',          // Commentaires /* */
+            '/\/\/.*$/m',
+            '/\/\*[\s\S]*?\*\
         ],
-        
-        // PHP - commentaires (en gardant les docblocks importants)
         'php_comments' => [
-            '/(?<!\/\*\*)\s*\/\/.*$/m',      // Commentaires // (sauf docblocks)
-            '/(?<!\/\*\*)\s*#.*$/m',         // Commentaires #
-            '/\/\*(?!\*)[\s\S]*?\*\//m',    // Commentaires /* */ (sauf docblocks)
+            '/(?<!\/\*\*)\s*\/\/.*$/m',
+            '/(?<!\/\*\*)\s*
+            '/\/\*(?!\*)[\s\S]*?\*\
         ],
-        
-        // CSS - commentaires
         'css_comments' => [
-            '/\/\*[\s\S]*?\*\//m',          // Commentaires /* */
+            '/\/\*[\s\S]*?\*\
         ],
-        
-        // Twig - commentaires
         'twig_comments' => [
-            '/\{\#[\s\S]*?\#\}/m',          // Commentaires {# #}
+            '/\{\
         ],
-        
-        // YAML - commentaires (pour les workflows GitHub)
         'yaml_comments' => [
-            '/^\s*#.*$/m',                   // Commentaires # en début de ligne
-            '/\s+#.*$/m',                    // Commentaires # en fin de ligne
+            '/^\s*
+            '/\s+
         ],
     ];
 
@@ -147,8 +136,6 @@ class CodeCleaner
                 return $type;
             }
         }
-        
-        // Cas spécial pour les fichiers .twig
         if (str_ends_with($filePath, '.html.twig')) {
             return 'twig';
         }
@@ -159,8 +146,6 @@ class CodeCleaner
     private function applyCleaningRules(string $content, string $type): string
     {
         $cleaned = $content;
-        
-        // Appliquer les règles spécifiques au type de fichier
         switch ($type) {
             case 'js':
                 $cleaned = $this->applyPatterns($cleaned, 'js_console');
@@ -183,8 +168,6 @@ class CodeCleaner
                 $cleaned = $this->applyPatterns($cleaned, 'yaml_comments');
                 break;
         }
-        
-        // Nettoyer les lignes vides multiples (plus de 2 lignes vides consécutives)
         $cleaned = preg_replace('/\n\s*\n\s*\n\s*\n/', "\n\n\n", $cleaned);
         
         return $cleaned;
@@ -205,8 +188,6 @@ class CodeCleaner
         return $cleaned;
     }
 }
-
-// Point d'entrée du script
 if ($argc < 2) {
     echo "Usage: php clean-code.php <directory>\n";
     echo "Exemple: php clean-code.php .\n";
