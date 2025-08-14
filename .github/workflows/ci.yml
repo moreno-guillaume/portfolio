@@ -39,6 +39,7 @@ jobs:
       - name: Install dependencies (dev included)
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
+
       # Test du nettoyage en mode dry-run TOUJOURS (même sur dev)
       - name: Test smart cleaning (dry-run)
         run: |
@@ -51,6 +52,7 @@ jobs:
         run: |
           echo "🧹 Application du nettoyage intelligent pour la production..."
           php scripts/clean-code.php --apply
+
 
       - name: Check cleaning results
         if: github.event.pull_request.base.ref == 'main'
@@ -71,6 +73,7 @@ jobs:
         with:
           commit_message: '[Smart Clean]: Suppression des commentaires de debug pour la production'
           commit_user_name: 'Smart Code Cleaner'
+
           commit_user_email: 'action@github.com'
 
       - name: Check PHPStan availability
@@ -91,5 +94,6 @@ jobs:
           echo "🎉 Portfolio prêt pour la production"
           echo "✅ Nettoyage intelligent appliqué"
           echo "✅ Code critique préservé"
+
           echo "✅ Standards de code respectés"
           echo "✅ Tests passés"

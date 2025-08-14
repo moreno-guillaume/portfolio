@@ -1,5 +1,6 @@
 <?php
 /**
+
  * Script de nettoyage intelligent et sécurisé
  * Version 2.0 - Ne supprime QUE les vrais commentaires de debug
  * 
@@ -194,7 +195,6 @@ class SmartCodeCleaner
         }
         return basename($filePath);
     }
-
     private function showSummary(): void
     {
         echo "\n📊 RÉSUMÉ DU NETTOYAGE\n";
@@ -233,4 +233,5 @@ if (isset($argv[1])) {
 }
 
 $cleaner = new SmartCodeCleaner($dryRun);
+
 $cleaner->cleanPortfolioCode();
