@@ -87,7 +87,7 @@ jobs:
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo "Portfolio prêt pour la production"
-          echo "Code automatiquement nettoyé (debug et info supprimés)"
+          echo "Nettoyage intelligent appliqué"
           echo "Code critique préservé"
           echo "Standards de code respectés"
           echo "Tests passés"
