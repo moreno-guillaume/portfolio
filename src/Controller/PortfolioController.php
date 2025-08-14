@@ -8,7 +8,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PortfolioController extends AbstractController
 {
-    #[Route('/', name: 'portfolio_home')]
     public function index(): Response
     {
         return $this->render('portfolio/index.html.twig');
