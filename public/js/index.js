@@ -8,38 +8,41 @@ import { PointGenerator } from './background/point-generator.js';
 import { NetworkBackground } from './background/network.js';
 
 class App {
-    constructor() {
+    constructor()
+    {
         this.modules = {};
         this.init();
     }
 
-    async init() {
+    async init()
+    {
         console.log('🚀 Initialisation de l\'application...');
-        
+
         try {
             await this.initBackgroundAnimation();
             console.log('✅ Application initialisée avec succès');
-            
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation:', error);
         }
     }
 
-    async initBackgroundAnimation() {
+    async initBackgroundAnimation()
+    {
         try {
             this.modules.backgroundAnimation = new NetworkBackground();
             console.log('✅ Module background animation initialisé');
-            
         } catch (error) {
             console.error('❌ Erreur module background:', error);
         }
     }
 
-    getModule(moduleName) {
+    getModule(moduleName)
+    {
         return this.modules[moduleName];
     }
 
-    destroy() {
+    destroy()
+    {
         Object.values(this.modules).forEach(module => {
             if (module && typeof module.destroy === 'function') {
                 module.destroy();

@@ -3,21 +3,24 @@
  * Responsabilité : Génération, placement stratégique et mise à jour des points
  */
 export class PointGenerator {
-    constructor(canvasWidth, canvasHeight) {
+    constructor(canvasWidth, canvasHeight)
+    {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
-        
+
         // Paramètres de placement
         this.margin = 80;
         this.cornerSize = 200;
     }
 
-    updateCanvasDimensions(width, height) {
+    updateCanvasDimensions(width, height)
+    {
         this.canvasWidth = width;
         this.canvasHeight = height;
     }
 
-    createPoint(x, y, zone = 'aléatoire') {
+    createPoint(x, y, zone = 'aléatoire')
+    {
         return {
             baseX: x,
             baseY: y,
@@ -31,13 +34,14 @@ export class PointGenerator {
         };
     }
 
-    generateStrategicPoints() {
+    generateStrategicPoints()
+    {
         const points = [];
-        
+
         console.log('Génération de points avec placement stratégique...');
-        
+
         // === 1. AMAS OBLIGATOIRES DANS LES COINS SUPÉRIEURS ===
-        
+
         // Coin supérieur gauche (2-3 points)
         const topLeftCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topLeftCount; i++) {
@@ -47,8 +51,8 @@ export class PointGenerator {
                 'coin supérieur gauche'
             ));
         }
-        
-        // Coin supérieur droit (2-3 points)  
+
+        // Coin supérieur droit (2-3 points)
         const topRightCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topRightCount; i++) {
             points.push(this.createPoint(
@@ -57,9 +61,9 @@ export class PointGenerator {
                 'coin supérieur droit'
             ));
         }
-        
+
         // === 2. POINTS SUR LES BORDS D'ÉCRAN ===
-        
+
         // Bord gauche (2 points)
         for (let i = 0; i < 2; i++) {
             points.push(this.createPoint(
@@ -68,7 +72,7 @@ export class PointGenerator {
                 'bord gauche'
             ));
         }
-        
+
         // Bord droit (2 points)
         for (let i = 0; i < 2; i++) {
             points.push(this.createPoint(
@@ -77,7 +81,7 @@ export class PointGenerator {
                 'bord droit'
             ));
         }
-        
+
         // Bord supérieur (1-2 points)
         const topBorderCount = Math.floor(Math.random() * 2) + 1;
         for (let i = 0; i < topBorderCount; i++) {
@@ -87,7 +91,7 @@ export class PointGenerator {
                 'bord supérieur'
             ));
         }
-        
+
         // Bord inférieur (1-2 points)
         const bottomBorderCount = Math.floor(Math.random() * 2) + 1;
         for (let i = 0; i < bottomBorderCount; i++) {
@@ -97,13 +101,13 @@ export class PointGenerator {
                 'bord inférieur'
             ));
         }
-        
+
         // === 3. POINTS ALÉATOIRES AU CENTRE ===
-        
+
         const currentCount = points.length;
         const targetTotal = 185;
         const randomPointsToAdd = Math.max(0, targetTotal - currentCount);
-        
+
         for (let i = 0; i < randomPointsToAdd; i++) {
             points.push(this.createPoint(
                 this.margin + Math.random() * (this.canvasWidth - 2 * this.margin),
@@ -111,41 +115,42 @@ export class PointGenerator {
                 'centre aléatoire'
             ));
         }
-        
+
         console.log(`${points.length} points créés avec placement stratégique`);
-        console.log(`- Coins supérieurs: ${topLeftCount + topRightCount} points`);
-        console.log(`- Bords: ${4 + topBorderCount + bottomBorderCount} points`);
-        console.log(`- Centre aléatoire: ${randomPointsToAdd} points`);
-        
+        console.log(` - Coins supérieurs: ${topLeftCount + topRightCount} points`);
+        console.log(` - Bords: ${4 + topBorderCount + bottomBorderCount} points`);
+        console.log(` - Centre aléatoire: ${randomPointsToAdd} points`);
+
         return points;
     }
 
-    updatePoints(points, startTime, mouse, mouseInfluenceRadius, mouseInfluenceStrength) {
+    updatePoints(points, startTime, mouse, mouseInfluenceRadius, mouseInfluenceStrength)
+    {
         const time = (Date.now() - startTime) * 0.001;
-        
+
         points.forEach(point => {
             // Mouvement organique de base
             const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
             const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
-            
+
             // Calcul de l'influence de la souris
             const dx = mouse.x - point.baseX;
             const dy = mouse.y - point.baseY;
             const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
-            
+
             let mouseOffsetX = 0;
             let mouseOffsetY = 0;
-            
+
             if (distanceToMouse < mouseInfluenceRadius) {
                 const influence = 1 - (distanceToMouse / mouseInfluenceRadius);
                 const angle = Math.atan2(dy, dx);
                 const forceX = Math.cos(angle) * influence * mouseInfluenceStrength;
                 const forceY = Math.sin(angle) * influence * mouseInfluenceStrength;
-                
+
                 mouseOffsetX = -forceX;
                 mouseOffsetY = -forceY;
             }
-            
+
             // Position finale
             point.x = point.baseX + offsetX + mouseOffsetX;
             point.y = point.baseY + offsetY + mouseOffsetY;

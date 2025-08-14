@@ -3,40 +3,46 @@
  * Responsabilité : Setup, redimensionnement, et rendu graphique
  */
 export class CanvasManager {
-    constructor(canvasId) {
+    constructor(canvasId)
+    {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
             throw new Error(`Canvas avec l'ID "${canvasId}" introuvable`);
         }
-        
+
         this.ctx = this.canvas.getContext('2d');
         this.setupCanvas();
     }
 
-    setupCanvas() {
+    setupCanvas()
+    {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         console.log(`Canvas configuré : ${this.canvas.width}x${this.canvas.height}`);
     }
 
-    getWidth() {
+    getWidth()
+    {
         return this.canvas.width;
     }
 
-    getHeight() {
+    getHeight()
+    {
         return this.canvas.height;
     }
 
-    clear() {
+    clear()
+    {
         this.ctx.fillStyle = '#F1F4F7';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    drawConnections(connections, points) {
+    drawConnections(connections, points)
+    {
         connections.forEach(connection => {
             const pointA = points[connection.from];
             const pointB = points[connection.to];
-            
+
             this.ctx.beginPath();
             this.ctx.moveTo(pointA.x, pointA.y);
             this.ctx.lineTo(pointB.x, pointB.y);
@@ -46,7 +52,8 @@ export class CanvasManager {
         });
     }
 
-    drawPoints(points) {
+    drawPoints(points)
+    {
         points.forEach(point => {
             this.ctx.beginPath();
             this.ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
@@ -55,13 +62,15 @@ export class CanvasManager {
         });
     }
 
-    draw(connections, points) {
+    draw(connections, points)
+    {
         this.clear();
         this.drawConnections(connections, points);
         this.drawPoints(points);
     }
 
-    onResize(callback) {
+    onResize(callback)
+    {
         window.addEventListener('resize', () => {
             this.setupCanvas();
             callback();
