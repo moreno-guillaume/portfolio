@@ -81,7 +81,7 @@ export class NetworkBackground {
                     const midX = (pointA.x + pointB.x) / 2;
                     const midY = (pointA.y + pointB.y) / 2;
                     const mouseDistanceToLine = Math.sqrt(
-                        (this.mouse.x - midX) *  * 2 + (this.mouse.y - midY) *  * 2
+                        Math.pow(this.mouse.x - midX, 2) + Math.pow(this.mouse.y - midY, 2)
                     );
 
                     if (mouseDistanceToLine < this.mouseInfluenceRadius) {
