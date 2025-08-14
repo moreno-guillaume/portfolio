@@ -4,7 +4,7 @@
  * Supprime les commentaires et console.log lors des PR dev -> main
  * 
  * Usage: php scripts/clean-code.php <directory>
- * Exemple: php scripts/clean-code.php src/
+ * Exemple: php scripts/clean-code.php .
  */
 
 class CodeCleaner
@@ -38,6 +38,12 @@ class CodeCleaner
         'twig_comments' => [
             '/\{\#[\s\S]*?\#\}/m',          // Commentaires {# #}
         ],
+        
+        // YAML - commentaires (pour les workflows GitHub)
+        'yaml_comments' => [
+            '/^\s*#.*$/m',                   // Commentaires # en début de ligne
+            '/\s+#.*$/m',                    // Commentaires # en fin de ligne
+        ],
     ];
 
     private array $fileExtensions = [
@@ -45,49 +51,93 @@ class CodeCleaner
         'php' => ['php'],
         'css' => ['css'],
         'twig' => ['twig', 'html.twig'],
+        'yaml' => ['yml', 'yaml'],
+    ];
+
+    private array $excludedDirs = [
+        '.git',
+        'node_modules',
+        'vendor',
+        '.phpunit.cache',
+        'var/cache',
+        'var/log',
     ];
 
     public function cleanDirectory(string $directory): void
     {
         echo "Nettoyage du code dans : $directory\n";
         
+        if (!is_dir($directory)) {
+            echo "Erreur : Le répertoire '$directory' n'existe pas.\n";
+            return;
+        }
+
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
         $cleanedFiles = 0;
+        $totalModifications = 0;
         
         foreach ($iterator as $file) {
-            if ($file->isFile()) {
-                $cleaned = $this->cleanFile($file->getPathname());
-                if ($cleaned) {
+            if ($file->isFile() && !$this->isExcluded($file->getPathname())) {
+                $result = $this->cleanFile($file->getPathname());
+                if ($result['cleaned']) {
                     $cleanedFiles++;
+                    $totalModifications += $result['modifications'];
                 }
             }
         }
         
         echo "Nettoyage terminé : $cleanedFiles fichiers traités\n";
+        if ($totalModifications > 0) {
+            echo "Total des modifications : $totalModifications suppressions\n";
+        }
     }
 
-    private function cleanFile(string $filePath): bool
+    private function isExcluded(string $filePath): bool
+    {
+        foreach ($this->excludedDirs as $excludedDir) {
+            if (strpos($filePath, $excludedDir) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function cleanFile(string $filePath): array
     {
         $extension = pathinfo($filePath, PATHINFO_EXTENSION);
         $type = $this->getFileType($extension, $filePath);
         
         if (!$type) {
-            return false; // Type de fichier non géré
+            return ['cleaned' => false, 'modifications' => 0];
         }
 
         $originalContent = file_get_contents($filePath);
+        $originalLines = substr_count($originalContent, "\n") + 1;
+        
         $cleanedContent = $this->applyCleaningRules($originalContent, $type);
+        $cleanedLines = substr_count($cleanedContent, "\n") + 1;
+        
+        $modifications = $originalLines - $cleanedLines;
         
         if ($originalContent !== $cleanedContent) {
             file_put_contents($filePath, $cleanedContent);
-            echo "🔧 Nettoyé : " . basename($filePath) . "\n";
-            return true;
+            echo "Nettoyé : " . $this->getRelativePath($filePath) . " (-$modifications lignes)\n";
+            return ['cleaned' => true, 'modifications' => $modifications];
         }
         
-        return false;
+        return ['cleaned' => false, 'modifications' => 0];
+    }
+
+    private function getRelativePath(string $filePath): string
+    {
+        $cwd = getcwd();
+        if (strpos($filePath, $cwd) === 0) {
+            return substr($filePath, strlen($cwd) + 1);
+        }
+        return $filePath;
     }
 
     private function getFileType(string $extension, string $filePath): ?string
@@ -128,10 +178,14 @@ class CodeCleaner
             case 'twig':
                 $cleaned = $this->applyPatterns($cleaned, 'twig_comments');
                 break;
+                
+            case 'yaml':
+                $cleaned = $this->applyPatterns($cleaned, 'yaml_comments');
+                break;
         }
         
-        // Nettoyer les lignes vides multiples
-        $cleaned = preg_replace('/\n\s*\n\s*\n/', "\n\n", $cleaned);
+        // Nettoyer les lignes vides multiples (plus de 2 lignes vides consécutives)
+        $cleaned = preg_replace('/\n\s*\n\s*\n\s*\n/', "\n\n\n", $cleaned);
         
         return $cleaned;
     }
@@ -140,42 +194,29 @@ class CodeCleaner
     {
         $cleaned = $content;
         
+        if (!isset($this->patterns[$patternGroup])) {
+            return $cleaned;
+        }
+        
         foreach ($this->patterns[$patternGroup] as $pattern) {
             $cleaned = preg_replace($pattern, '', $cleaned);
         }
         
         return $cleaned;
     }
-
-    public function preserveImportantComments(string $content): string
-    {
-        // Préserver les commentaires importants (licences, docblocks, etc.)
-        $importantPatterns = [
-            '/\/\*\*[\s\S]*?\*\//',         // Docblocks PHP
-            '/\/\*\s*@[\s\S]*?\*\//',       // Annotations
-            '/\/\*\s*(TODO|FIXME|NOTE)[\s\S]*?\*\//', // Commentaires de développement importants
-        ];
-        
-        // Cette méthode peut être étendue pour préserver certains commentaires
-        return $content;
-    }
 }
 
-// Utilisation du script
+// Point d'entrée du script
 if ($argc < 2) {
     echo "Usage: php clean-code.php <directory>\n";
+    echo "Exemple: php clean-code.php .\n";
     echo "Exemple: php clean-code.php src/\n";
     exit(1);
 }
 
 $directory = $argv[1];
 
-if (!is_dir($directory)) {
-    echo "❌ Erreur: Le répertoire '$directory' n'existe pas.\n";
-    exit(1);
-}
-
 $cleaner = new CodeCleaner();
 $cleaner->cleanDirectory($directory);
 
-echo "🎉 Nettoyage automatique terminé !\n";
+echo "Nettoyage automatique terminé !\n";

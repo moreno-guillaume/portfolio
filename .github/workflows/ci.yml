@@ -9,7 +9,6 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    # CORRECTION: Permissions nécessaires pour le push automatique
     permissions:
       contents: write
       pull-requests: write
@@ -17,11 +16,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        # On récupère le token pour pouvoir push les modifications nettoyées
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          ref: ${{ github.head_ref }}  # CORRECTION: Évite le detached HEAD
+          ref: ${{ github.head_ref }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -39,27 +37,16 @@ jobs:
           restore-keys: composer-
 
       - name: Install dependencies (dev included)
-      # --ignore-platform-reqs ajouté, les erreurs liées aux dépendances créent des refus de PR côté git
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      # Nettoyage automatique du code (seulement pour PR vers main)
-      # Supprime tous les commentaires et console.log avant le merge en production
       - name: Clean code automatically
         if: github.event.pull_request.base.ref == 'main'
         run: |
           echo "Démarrage du nettoyage automatique"
-          echo "Nettoyage du dossier src/"
-          php scripts/clean-code.php src/
-          echo "Nettoyage du dossier templates/"
-          php scripts/clean-code.php templates/
-          echo "Nettoyage du dossier public/js/"
-          php scripts/clean-code.php public/js/
-          echo "Nettoyage du dossier public/css/"
-          php scripts/clean-code.php public/css/
+          echo "Nettoyage de tout le projet"
+          php scripts/clean-code.php .
           echo "Nettoyage terminé"
 
-      # Vérification des modifications après nettoyage
-      # Si le script a modifié des fichiers, commit auto
       - name: Check if cleaning made changes
         if: github.event.pull_request.base.ref == 'main'
         id: check_changes
@@ -76,8 +63,6 @@ jobs:
             echo "Aucune modification nécessaire"
           fi
 
-      # CORRECTION: Commit automatique du code nettoyé avec action spécialisée
-      # Push les modifications directement dans la PR
       - name: Commit cleaned code
         if: github.event.pull_request.base.ref == 'main' && steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -87,7 +72,6 @@ jobs:
           commit_user_email: 'action@github.com'
           commit_author: 'Code Cleaner Bot <action@github.com>'
 
-      # Message de confirmation
       - name: Cleaning summary
         if: github.event.pull_request.base.ref == 'main'
         run: |
@@ -109,7 +93,6 @@ jobs:
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
 
-      # Message final pour les PR -> main
       - name: Ready for production
         if: github.event.pull_request.base.ref == 'main'
         run: |
