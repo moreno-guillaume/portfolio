@@ -1,48 +1,97 @@
 <?php
 /**
- * Script de nettoyage automatique CIBLÉ
- * Nettoie UNIQUEMENT les fichiers de développement du portfolio
- * Évite vendor/, config/, bin/, var/ et autres fichiers Symfony
+ * Script de nettoyage intelligent et sécurisé
+ * Version 2.0 - Ne supprime QUE les vrais commentaires de debug
+ * 
+ * SÉCURITÉS :
+ * - Préserve les attributs PHP 8 (#[...])
+ * - Préserve les docblocks importants
+ * - Préserve les commentaires de licence
+ * - Mode dry-run pour tester
  */
 
-class PortfolioCodeCleaner
+class SmartCodeCleaner
 {
-    // Dossiers SPÉCIFIQUES à nettoyer (votre code uniquement)
     private array $targetDirectories = [
-        'src/Controller',           // Vos contrôleurs PHP
-        'templates',                // Vos templates Twig
-        'public/css',               // Vos fichiers CSS
-        'public/js',                // Vos fichiers JavaScript
+        'src/Controller',           
+        'templates',                
+        'public/css',               
+        'public/js',                
     ];
 
-    // Patterns de nettoyage par type de fichier
-    private array $cleaningPatterns = [
-        'php' => [
-            '/\/\/.*$/m',                    // Commentaires //
-            '/(?<!\/\*\*)\s*#.*$/m',         // Commentaires # (sauf docblocks)
-            '/\/\*(?!\*)[\s\S]*?\*\//m',    // Commentaires /* */ (sauf docblocks)
-        ],
+    // Patterns TRÈS spécifiques pour les vrais commentaires de debug
+    private array $safeCleaningPatterns = [
         'js' => [
-            '/console\.(log|warn|error|info|debug|trace)\s*\([^)]*\)\s*;?\s*\n?/m',
-            '/\/\/.*$/m',                    // Commentaires //
-            '/\/\*[\s\S]*?\*\//m',          // Commentaires /* */
+            // Console logs avec contenu explicitement de debug
+            '/console\.log\s*\(\s*[\'"].*?(debug|test|temp|todo|fixme).*?[\'"].*?\)\s*;?\s*\n?/im',
+            '/console\.(warn|error|info)\s*\(\s*[\'"].*?(debug|test|temp).*?[\'"].*?\)\s*;?\s*\n?/im',
+            
+            // Commentaires avec mots-clés de debug
+            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
+            '/\/\/\s*(todo|fixme|debug|test|temp).*$/m',
+            
+            // Commentaires vides ou très courts
+            '/\/\/\s*$/m',
+            '/\/\/\s{1,3}$/m',
         ],
+        
+        'php' => [
+            // Commentaires avec mots-clés de debug (PAS les attributs #[...])
+            '/(?<!#\[)\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
+            '/(?<!#\[)\/\/\s*(todo|fixme|debug|test|temp).*$/m',
+            
+            // Commentaires # avec mots-clés de debug (PAS les attributs)
+            '/(?<!#\[)#\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
+            '/(?<!#\[)#\s*(todo|fixme|debug|test|temp).*$/m',
+            
+            // Commentaires vides
+            '/\/\/\s*$/m',
+            '/#\s*$/m',
+            
+            // Commentaires multilignes avec mots-clés debug (PRÉSERVE docblocks /**)
+            '/\/\*(?!\*)\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\*\//m',
+        ],
+        
         'css' => [
-            '/\/\*[\s\S]*?\*\//m',          // Commentaires /* */
+            // Commentaires CSS avec mots-clés de debug
+            '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\*\//m',
+            '/\/\*\s*(todo|fixme|debug|test|temp)[\s\S]*?\*\//m',
         ],
+        
         'twig' => [
-            '/\{\#[\s\S]*?\#\}/m',          // Commentaires {# #}
+            // Commentaires Twig avec mots-clés de debug
+            '/\{\#\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\#\}/m',
+            '/\{\#\s*(todo|fixme|debug|test|temp)[\s\S]*?\#\}/m',
         ],
     ];
+
+    // Patterns absolument interdits (ne jamais toucher)
+    private array $forbiddenPatterns = [
+        '/\#\[Route\(/',           // Attributs Route
+        '/\#\[.*?\]/',             // Tous attributs PHP 8
+        '/\/\*\*[\s\S]*?\*\//',    // Docblocks
+        '/\@[A-Za-z]+/',           // Annotations
+        '/namespace\s/',           // Déclarations namespace
+        '/use\s/',                 // Imports
+        '/class\s/',               // Déclarations class
+        '/function\s/',            // Déclarations function
+    ];
+
+    private bool $dryRun = false;
+    private array $stats = [];
+
+    public function __construct(bool $dryRun = false)
+    {
+        $this->dryRun = $dryRun;
+        $this->stats = ['scanned' => 0, 'cleaned' => 0, 'lines_removed' => 0];
+    }
 
     public function cleanPortfolioCode(): void
     {
-        echo "🎯 Nettoyage ciblé du portfolio étudiant\n";
-        echo "📂 Dossiers concernés : " . implode(', ', $this->targetDirectories) . "\n\n";
+        echo "🧹 Smart Code Cleaner v2.0\n";
+        echo "🛡️  Mode sécurisé : Supprime UNIQUEMENT les commentaires de debug\n";
+        echo "⚡ Mode : " . ($this->dryRun ? "DRY-RUN (simulation)" : "NETTOYAGE RÉEL") . "\n\n";
         
-        $totalCleaned = 0;
-        $totalModifications = 0;
-
         foreach ($this->targetDirectories as $directory) {
             if (!is_dir($directory)) {
                 echo "⚠️  Dossier ignoré (inexistant) : $directory\n";
@@ -50,79 +99,88 @@ class PortfolioCodeCleaner
             }
 
             echo "🔍 Analyse de : $directory\n";
-            $result = $this->cleanDirectory($directory);
-            $totalCleaned += $result['files'];
-            $totalModifications += $result['modifications'];
+            $this->cleanDirectory($directory);
         }
 
-        echo "\n✅ Nettoyage terminé !\n";
-        echo "📊 Résumé : $totalCleaned fichiers traités, $totalModifications lignes supprimées\n";
+        $this->showSummary();
     }
 
-    private function cleanDirectory(string $directory): array
+    private function cleanDirectory(string $directory): void
     {
-        $cleanedFiles = 0;
-        $totalModifications = 0;
-
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
         foreach ($iterator as $file) {
             if ($file->isFile()) {
-                $result = $this->cleanFile($file->getPathname());
-                if ($result['cleaned']) {
-                    $cleanedFiles++;
-                    $totalModifications += $result['modifications'];
-                }
+                $this->cleanFile($file->getPathname());
             }
         }
-
-        echo "   → $cleanedFiles fichiers nettoyés\n";
-        return ['files' => $cleanedFiles, 'modifications' => $totalModifications];
     }
 
-    private function cleanFile(string $filePath): array
+    private function cleanFile(string $filePath): void
     {
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         
-        // Gestion spéciale pour les fichiers Twig
         if (str_ends_with($filePath, '.html.twig')) {
             $extension = 'twig';
         }
 
-        // Vérifier si on doit nettoyer ce type de fichier
-        if (!isset($this->cleaningPatterns[$extension])) {
-            return ['cleaned' => false, 'modifications' => 0];
+        if (!isset($this->safeCleaningPatterns[$extension])) {
+            return;
         }
 
+        $this->stats['scanned']++;
         $originalContent = file_get_contents($filePath);
-        $cleanedContent = $this->applyCleaningPatterns($originalContent, $extension);
         
-        // Compter les lignes supprimées
+        // SÉCURITÉ ABSOLUE : Vérifier qu'on ne touche pas à du code critique
+        if ($this->containsForbiddenPatterns($originalContent)) {
+            echo "   🛡️  PROTÉGÉ : " . $this->getRelativePath($filePath) . " (contient du code critique)\n";
+            return;
+        }
+
+        $cleanedContent = $this->applySmartCleaning($originalContent, $extension);
+        
         $originalLines = substr_count($originalContent, "\n");
         $cleanedLines = substr_count($cleanedContent, "\n");
-        $modifications = $originalLines - $cleanedLines;
+        $linesRemoved = $originalLines - $cleanedLines;
 
-        if ($originalContent !== $cleanedContent) {
-            file_put_contents($filePath, $cleanedContent);
-            $relativePath = $this->getRelativePath($filePath);
-            echo "   🧹 $relativePath (-$modifications lignes)\n";
-            return ['cleaned' => true, 'modifications' => $modifications];
+        if ($originalContent !== $cleanedContent && $linesRemoved > 0) {
+            if (!$this->dryRun) {
+                file_put_contents($filePath, $cleanedContent);
+            }
+            
+            echo "   " . ($this->dryRun ? "🔍" : "🧹") . " " . 
+                 $this->getRelativePath($filePath) . " (-$linesRemoved lignes)\n";
+            
+            $this->stats['cleaned']++;
+            $this->stats['lines_removed'] += $linesRemoved;
         }
-
-        return ['cleaned' => false, 'modifications' => 0];
     }
 
-    private function applyCleaningPatterns(string $content, string $fileType): string
+    private function containsForbiddenPatterns(string $content): bool
+    {
+        foreach ($this->forbiddenPatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function applySmartCleaning(string $content, string $fileType): string
     {
         $cleaned = $content;
         
-        foreach ($this->cleaningPatterns[$fileType] as $pattern) {
+        if (!isset($this->safeCleaningPatterns[$fileType])) {
+            return $cleaned;
+        }
+
+        foreach ($this->safeCleaningPatterns[$fileType] as $pattern) {
             $cleaned = preg_replace($pattern, '', $cleaned);
         }
 
-        // Nettoyer les lignes vides excessives (plus de 2 lignes vides)
+        // Nettoyer les lignes vides excessives mais préserver la structure
         $cleaned = preg_replace('/\n\s*\n\s*\n\s*\n/', "\n\n\n", $cleaned);
         
         return $cleaned;
@@ -136,17 +194,43 @@ class PortfolioCodeCleaner
         }
         return basename($filePath);
     }
+
+    private function showSummary(): void
+    {
+        echo "\n📊 RÉSUMÉ DU NETTOYAGE\n";
+        echo "   Fichiers analysés : {$this->stats['scanned']}\n";
+        echo "   Fichiers nettoyés : {$this->stats['cleaned']}\n";
+        echo "   Lignes supprimées : {$this->stats['lines_removed']}\n";
+        
+        if ($this->dryRun) {
+            echo "\n💡 C'était un DRY-RUN ! Aucun fichier n'a été modifié.\n";
+            echo "   Pour appliquer les changements : php scripts/clean-code.php --apply\n";
+        } else {
+            echo "\n✅ Nettoyage terminé avec succès !\n";
+        }
+    }
 }
 
-// Exécution du script
-if (php_sapi_name() !== 'cli') {
-    echo "❌ Ce script doit être exécuté en ligne de commande\n";
-    exit(1);
+// Gestion des arguments
+$dryRun = true; // Par défaut en mode dry-run pour la sécurité
+
+if (isset($argv[1])) {
+    if ($argv[1] === '--apply') {
+        $dryRun = false;
+    } elseif ($argv[1] === '--dry-run' || $argv[1] === '--test') {
+        $dryRun = true;
+    } elseif ($argv[1] === '--help') {
+        echo "🧹 Smart Code Cleaner v2.0\n\n";
+        echo "Usage:\n";
+        echo "  php scripts/clean-code.php           # Mode dry-run (test)\n";
+        echo "  php scripts/clean-code.php --apply   # Nettoyage réel\n";
+        echo "  php scripts/clean-code.php --test    # Mode dry-run explicite\n";
+        echo "  php scripts/clean-code.php --help    # Cette aide\n\n";
+        echo "Supprime UNIQUEMENT les commentaires de debug (TODO, FIXME, etc.)\n";
+        echo "Préserve les attributs PHP 8, docblocks et code important.\n";
+        exit(0);
+    }
 }
 
-echo "🚀 Script de nettoyage Portfolio - Version ciblée\n";
-echo "📌 Nettoie UNIQUEMENT vos fichiers de développement\n";
-echo "🛡️  Évite vendor/, config/, bin/, var/\n\n";
-
-$cleaner = new PortfolioCodeCleaner();
+$cleaner = new SmartCodeCleaner($dryRun);
 $cleaner->cleanPortfolioCode();
