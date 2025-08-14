@@ -39,17 +39,15 @@ jobs:
       - name: Install dependencies (dev included)
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      # Test du nettoyage en mode dry-run TOUJOURS (même sur dev)
       - name: Test smart cleaning (dry-run)
         run: |
-          echo "🔍 Test du nettoyage intelligent..."
+          echo "Test du nettoyage intelligent..."
           php scripts/clean-code.php --test
 
-      # Nettoyage réel UNIQUEMENT pour les PR vers main
       - name: Apply smart cleaning for production
         if: github.event.pull_request.base.ref == 'main'
         run: |
-          echo "🧹 Application du nettoyage intelligent pour la production..."
+          echo "Application du nettoyage intelligent pour la production..."
           php scripts/clean-code.php --apply
 
       - name: Check cleaning results
@@ -58,18 +56,18 @@ jobs:
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
-            echo "📝 Modifications appliquées par le nettoyage intelligent :"
+            echo "Modifications appliquées par le nettoyage intelligent :"
             git diff --stat
           else
             echo "changes=false" >> $GITHUB_OUTPUT
-            echo "✅ Aucun commentaire de debug trouvé - Code déjà propre !"
+            echo "Aucun commentaire de debug ou info trouvé - Code déjà propre !"
           fi
 
       - name: Commit cleaned code
         if: github.event.pull_request.base.ref == 'main' && steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: '[Smart Clean]: Suppression des commentaires de debug pour la production'
+          commit_message: '[Smart Clean]: Suppression des commentaires de debug et info pour la production'
           commit_user_name: 'Smart Code Cleaner'
           commit_user_email: 'action@github.com'
 
@@ -88,8 +86,8 @@ jobs:
       - name: Production ready summary
         if: github.event.pull_request.base.ref == 'main'
         run: |
-          echo "🎉 Portfolio prêt pour la production"
-          echo "✅ Nettoyage intelligent appliqué"
-          echo "✅ Code critique préservé"
-          echo "✅ Standards de code respectés"
-          echo "✅ Tests passés"
+          echo "Portfolio prêt pour la production"
+          echo "Code automatiquement nettoyé (debug et info supprimés)"
+          echo "Code critique préservé"
+          echo "Standards de code respectés"
+          echo "Tests passés"

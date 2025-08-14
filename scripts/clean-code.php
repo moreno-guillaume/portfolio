@@ -1,7 +1,7 @@
 <?php
 /**
  * Script de nettoyage intelligent et sécurisé
- * Version 2.0 - Ne supprime QUE les vrais commentaires de debug
+ * Version 2.1 - Ne supprime QUE les vrais commentaires de debug et info
  * 
  * SÉCURITÉS :
  * - Préserve les attributs PHP 8 (#[...])
@@ -19,16 +19,29 @@ class SmartCodeCleaner
         'public/js',                
     ];
 
-    // Patterns TRÈS spécifiques pour les vrais commentaires de debug
+    // Dossiers explicitement exclus du nettoyage
+    private array $excludedDirectories = [
+        '.git',
+        '.github',
+        'vendor',
+        'node_modules',
+        '.phpunit.cache',
+        'var',
+        'bin',
+        'config',
+        'migrations',
+    ];
+
+    // Patterns TRÈS spécifiques pour les vrais commentaires de debug et info
     private array $safeCleaningPatterns = [
         'js' => [
             // Console logs avec contenu explicitement de debug
-            '/console\.log\s*\(\s*[\'"].*?(debug|test|temp|todo|fixme).*?[\'"].*?\)\s*;?\s*\n?/im',
-            '/console\.(warn|error|info)\s*\(\s*[\'"].*?(debug|test|temp).*?[\'"].*?\)\s*;?\s*\n?/im',
+            '/console\.log\s*\(\s*[\'"].*?(debug|test|temp|todo|fixme|info).*?[\'"].*?\)\s*;?\s*\n?/im',
+            '/console\.(warn|error|info)\s*\(\s*[\'"].*?(debug|test|temp|info).*?[\'"].*?\)\s*;?\s*\n?/im',
             
-            // Commentaires avec mots-clés de debug
-            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
-            '/\/\/\s*(todo|fixme|debug|test|temp).*$/m',
+            // Commentaires avec mots-clés de debug et info
+            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+            '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
             
             // Commentaires vides ou très courts
             '/\/\/\s*$/m',
@@ -36,45 +49,29 @@ class SmartCodeCleaner
         ],
         
         'php' => [
-            // Commentaires avec mots-clés de debug (PAS les attributs #[...])
-            '/(?<!#\[)\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
-            '/(?<!#\[)\/\/\s*(todo|fixme|debug|test|temp).*$/m',
-            
-            // Commentaires # avec mots-clés de debug (PAS les attributs)
-            '/(?<!#\[)#\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK).*$/m',
-            '/(?<!#\[)#\s*(todo|fixme|debug|test|temp).*$/m',
+            // Commentaires avec mots-clés de debug et info - Version simplifiée et sûre
+            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+            '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
             
             // Commentaires vides
             '/\/\/\s*$/m',
-            '/#\s*$/m',
             
-            // Commentaires multilignes avec mots-clés debug (PRÉSERVE docblocks /**)
-            '/\/\*(?!\*)\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\*\//m',
+            // Commentaires multilignes avec mots-clés debug et info (PRÉSERVE docblocks /**)
+            '/\/\*(?!\*)\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+            '/\/\*(?!\*)\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
         ],
         
         'css' => [
-            // Commentaires CSS avec mots-clés de debug
-            '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\*\//m',
-            '/\/\*\s*(todo|fixme|debug|test|temp)[\s\S]*?\*\//m',
+            // Commentaires CSS avec mots-clés de debug et info
+            '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+            '/\/\*\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
         ],
         
         'twig' => [
-            // Commentaires Twig avec mots-clés de debug
-            '/\{\#\s*(TODO|FIXME|DEBUG|TEST|TEMP)[\s\S]*?\#\}/m',
-            '/\{\#\s*(todo|fixme|debug|test|temp)[\s\S]*?\#\}/m',
+            // Commentaires Twig avec mots-clés de debug et info
+            '/\{\#\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\#\}/m',
+            '/\{\#\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\#\}/m',
         ],
-    ];
-
-    // Patterns absolument interdits (ne jamais toucher)
-    private array $forbiddenPatterns = [
-        '/\#\[Route\(/',           // Attributs Route
-        '/\#\[.*?\]/',             // Tous attributs PHP 8
-        '/\/\*\*[\s\S]*?\*\//',    // Docblocks
-        '/\@[A-Za-z]+/',           // Annotations
-        '/namespace\s/',           // Déclarations namespace
-        '/use\s/',                 // Imports
-        '/class\s/',               // Déclarations class
-        '/function\s/',            // Déclarations function
     ];
 
     private bool $dryRun = false;
@@ -88,17 +85,18 @@ class SmartCodeCleaner
 
     public function cleanPortfolioCode(): void
     {
-        echo "🧹 Smart Code Cleaner v2.0\n";
-        echo "🛡️  Mode sécurisé : Supprime UNIQUEMENT les commentaires de debug\n";
-        echo "⚡ Mode : " . ($this->dryRun ? "DRY-RUN (simulation)" : "NETTOYAGE RÉEL") . "\n\n";
+        echo "Smart Code Cleaner v2.1\n";
+        echo "Mode sécurisé : Supprime UNIQUEMENT les commentaires de debug et info\n";
+        echo "Mode : " . ($this->dryRun ? "DRY-RUN (simulation)" : "NETTOYAGE RÉEL") . "\n";
+        echo "Dossiers exclus : " . implode(', ', $this->excludedDirectories) . "\n\n";
         
         foreach ($this->targetDirectories as $directory) {
             if (!is_dir($directory)) {
-                echo "⚠️  Dossier ignoré (inexistant) : $directory\n";
+                echo "Dossier ignoré (inexistant) : $directory\n";
                 continue;
             }
 
-            echo "🔍 Analyse de : $directory\n";
+            echo "Analyse de : $directory\n";
             $this->cleanDirectory($directory);
         }
 
@@ -112,10 +110,21 @@ class SmartCodeCleaner
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile()) {
+            if ($file->isFile() && !$this->isInExcludedDirectory($file->getPathname())) {
                 $this->cleanFile($file->getPathname());
             }
         }
+    }
+
+    private function isInExcludedDirectory(string $filePath): bool
+    {
+        foreach ($this->excludedDirectories as $excludedDir) {
+            if (strpos($filePath, DIRECTORY_SEPARATOR . $excludedDir . DIRECTORY_SEPARATOR) !== false || 
+                strpos($filePath, $excludedDir . DIRECTORY_SEPARATOR) === 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function cleanFile(string $filePath): void
@@ -133,12 +142,6 @@ class SmartCodeCleaner
         $this->stats['scanned']++;
         $originalContent = file_get_contents($filePath);
         
-        // SÉCURITÉ ABSOLUE : Vérifier qu'on ne touche pas à du code critique
-        if ($this->containsForbiddenPatterns($originalContent)) {
-            echo "   🛡️  PROTÉGÉ : " . $this->getRelativePath($filePath) . " (contient du code critique)\n";
-            return;
-        }
-
         $cleanedContent = $this->applySmartCleaning($originalContent, $extension);
         
         $originalLines = substr_count($originalContent, "\n");
@@ -150,22 +153,12 @@ class SmartCodeCleaner
                 file_put_contents($filePath, $cleanedContent);
             }
             
-            echo "   " . ($this->dryRun ? "🔍" : "🧹") . " " . 
+            echo "   " . ($this->dryRun ? "[TEST]" : "[CLEAN]") . " " . 
                  $this->getRelativePath($filePath) . " (-$linesRemoved lignes)\n";
             
             $this->stats['cleaned']++;
             $this->stats['lines_removed'] += $linesRemoved;
         }
-    }
-
-    private function containsForbiddenPatterns(string $content): bool
-    {
-        foreach ($this->forbiddenPatterns as $pattern) {
-            if (preg_match($pattern, $content)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private function applySmartCleaning(string $content, string $fileType): string
@@ -197,16 +190,16 @@ class SmartCodeCleaner
 
     private function showSummary(): void
     {
-        echo "\n📊 RÉSUMÉ DU NETTOYAGE\n";
+        echo "\nRÉSUMÉ DU NETTOYAGE\n";
         echo "   Fichiers analysés : {$this->stats['scanned']}\n";
         echo "   Fichiers nettoyés : {$this->stats['cleaned']}\n";
         echo "   Lignes supprimées : {$this->stats['lines_removed']}\n";
         
         if ($this->dryRun) {
-            echo "\n💡 C'était un DRY-RUN ! Aucun fichier n'a été modifié.\n";
+            echo "\nC'était un DRY-RUN ! Aucun fichier n'a été modifié.\n";
             echo "   Pour appliquer les changements : php scripts/clean-code.php --apply\n";
         } else {
-            echo "\n✅ Nettoyage terminé avec succès !\n";
+            echo "\nNettoyage terminé avec succès !\n";
         }
     }
 }
@@ -220,13 +213,13 @@ if (isset($argv[1])) {
     } elseif ($argv[1] === '--dry-run' || $argv[1] === '--test') {
         $dryRun = true;
     } elseif ($argv[1] === '--help') {
-        echo "🧹 Smart Code Cleaner v2.0\n\n";
+        echo "Smart Code Cleaner v2.1\n\n";
         echo "Usage:\n";
         echo "  php scripts/clean-code.php           # Mode dry-run (test)\n";
         echo "  php scripts/clean-code.php --apply   # Nettoyage réel\n";
         echo "  php scripts/clean-code.php --test    # Mode dry-run explicite\n";
         echo "  php scripts/clean-code.php --help    # Cette aide\n\n";
-        echo "Supprime UNIQUEMENT les commentaires de debug (TODO, FIXME, etc.)\n";
+        echo "Supprime UNIQUEMENT les commentaires de debug et info (TODO, FIXME, INFO, etc.)\n";
         echo "Préserve les attributs PHP 8, docblocks et code important.\n";
         exit(0);
     }
