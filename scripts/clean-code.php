@@ -1,6 +1,5 @@
 <?php
 /**
-
  * Script de nettoyage intelligent et sécurisé
  * Version 2.1 - Ne supprime QUE les vrais commentaires de debug et info
  * 
@@ -36,9 +35,9 @@ class SmartCodeCleaner
     // Patterns TRÈS spécifiques pour les vrais commentaires de debug et info
     private array $safeCleaningPatterns = [
         'js' => [
-            // Console logs avec contenu explicitement de debug
-            '/console\.log\s*\(\s*[\'"].*?(debug|test|temp|todo|fixme|info).*?[\'"].*?\)\s*;?\s*\n?/im',
-            '/console\.(warn|error|info)\s*\(\s*[\'"].*?(debug|test|temp|info).*?[\'"].*?\)\s*;?\s*\n?/im',
+            // Console logs - VERSION SIMPLE : toute ligne avec console.log + mot-clé
+            '/^.*console\.log.*[\'"].*?(debug|test|temp|todo|fixme|info).*$/im',
+            '/^.*console\.(warn|error|info).*[\'"].*?(debug|test|temp).*$/im',
             
             // Commentaires avec mots-clés de debug et info
             '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
@@ -141,7 +140,18 @@ class SmartCodeCleaner
         }
 
         $this->stats['scanned']++;
+        
+        // Gestion de l'encodage UTF-8
         $originalContent = file_get_contents($filePath);
+        if ($originalContent === false) {
+            echo "   ERREUR : Impossible de lire " . $this->getRelativePath($filePath) . "\n";
+            return;
+        }
+        
+        // Assurer l'encodage UTF-8
+        if (!mb_check_encoding($originalContent, 'UTF-8')) {
+            $originalContent = mb_convert_encoding($originalContent, 'UTF-8', 'auto');
+        }
         
         $cleanedContent = $this->applySmartCleaning($originalContent, $extension);
         
@@ -165,13 +175,22 @@ class SmartCodeCleaner
     private function applySmartCleaning(string $content, string $fileType): string
     {
         $cleaned = $content;
+        $originalLength = strlen($content);
         
         if (!isset($this->safeCleaningPatterns[$fileType])) {
             return $cleaned;
         }
 
+        $totalRemoved = 0;
         foreach ($this->safeCleaningPatterns[$fileType] as $pattern) {
+            $beforeLength = strlen($cleaned);
             $cleaned = preg_replace($pattern, '', $cleaned);
+            $afterLength = strlen($cleaned);
+            $totalRemoved += ($beforeLength - $afterLength);
+        }
+
+        if ($totalRemoved > 0) {
+            echo "      → Supprimé $totalRemoved caractères avec patterns $fileType\n";
         }
 
         // Nettoyer les lignes vides excessives mais préserver la structure
@@ -188,6 +207,7 @@ class SmartCodeCleaner
         }
         return basename($filePath);
     }
+
     private function showSummary(): void
     {
         echo "\nRÉSUMÉ DU NETTOYAGE\n";
@@ -226,5 +246,4 @@ if (isset($argv[1])) {
 }
 
 $cleaner = new SmartCodeCleaner($dryRun);
-
 $cleaner->cleanPortfolioCode();
