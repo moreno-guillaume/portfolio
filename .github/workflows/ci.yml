@@ -1,4 +1,4 @@
-# Workflow entièrement automatisé avec PAT pour bypasser les protections
+# Solution contournement : Nettoyage via PR automatique
 name: CI
 
 on:
@@ -50,18 +50,19 @@ jobs:
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
 
-  # Nettoyage automatique après merge sur main
-  production-clean:
+  # 🤖 Créer une PR automatique de nettoyage
+  create-cleaning-pr:
     runs-on: ubuntu-latest
-    # Se déclenche SEULEMENT après un push sur main (post-merge)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+      pull-requests: write
     
     steps:
-      - name: Checkout main branch with admin token
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           ref: main
-          # 🔑 Utiliser le PAT au lieu du GITHUB_TOKEN
           token: ${{ secrets.PORTFOLIO_TOKEN }}
           fetch-depth: 0
 
@@ -71,107 +72,86 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, xml
 
-      - name: Configure Git with bot identity
+      - name: Configure Git
         run: |
           git config --local user.email "bot@portfolio.dev"
           git config --local user.name "Portfolio Cleaner Bot"
 
-      - name: Apply smart cleaning for production
+      - name: Create cleaning branch
         run: |
-          echo "Nettoyage intelligent en cours sur MAIN..."
-          echo "Fichiers avant nettoyage :"
-          find public/js -name "*.js" -exec echo "  📄 {}" \;
-          
-          php scripts/clean-code.php --apply
-          
-          echo "Nettoyage terminé"
+          timestamp=$(date +%Y%m%d-%H%M%S)
+          git checkout -b "auto-clean-$timestamp"
+          echo "BRANCH_NAME=auto-clean-$timestamp" >> $GITHUB_ENV
 
-      - name: Check cleaning results
+      - name: Apply smart cleaning
+        run: |
+          echo "🧹 Nettoyage du code..."
+          php scripts/clean-code.php --apply
+
+      - name: Check and commit changes
         id: check_changes
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
-            echo "RÉSULTATS DU NETTOYAGE :"
-            echo "Fichiers modifiés :"
+            
+            echo "📊 Fichiers modifiés :"
             git status --porcelain
-            echo ""
-            echo "Statistiques :"
-            git diff --stat
-            echo ""
-            echo "Commentaires supprimés avec succès !"
+            
+            git add -A
+            git commit -m "🧹 [Auto-Clean]: Code nettoyé pour la production
+
+            📋 Nettoyage automatique :
+            - Suppression des commentaires TODO, DEBUG, INFO
+            - Nettoyage des console.log de debug
+            - Optimisation pour la production
+            
+            🤖 Généré automatiquement par GitHub Actions"
+            
+            git push origin "$BRANCH_NAME"
           else
             echo "changes=false" >> $GITHUB_OUTPUT
-            echo "Code déjà propre - aucun nettoyage nécessaire"
+            echo "✅ Code déjà propre"
           fi
 
-      # Commit et push avec bypass des protections
-      - name: Commit and push cleaned code
+      # 🔄 Créer la PR automatique
+      - name: Create Pull Request
         if: steps.check_changes.outputs.changes == 'true'
-        run: |
-          echo "Commit du code nettoyé..."
-          
-          git add -A
-          git commit -m "🧹 [Auto-Clean]: Suppression automatique des commentaires de debug
-
-          Résumé :
-          - Commentaires TODO, DEBUG, INFO supprimés
-          - Console.log de debug nettoyés  
-          - Code de production optimisé
-          - Dev branch préservée
-          
-          Nettoyage automatique par GitHub Actions"
-          
-          echo "Push vers main (bypass protections)..."
-          git push origin main
-          
-          echo "Code de production nettoyé avec succès !"
-
-      # Résumé final
-      - name: Production deployment summary
-        run: |
-          echo "DÉPLOIEMENT PRODUCTION TERMINÉ"
-          echo ""
-          echo "Statut :"
-          if [[ "${{ steps.check_changes.outputs.changes }}" == "true" ]]; then
-            echo "   Code nettoyé automatiquement"
-            echo "   Commit créé sur main"
-            echo "   Prêt pour la production"
-          else
-            echo "   Code déjà propre"
-            echo "   Aucune action requise"
-          fi
-          echo ""
-          echo "Branches :"
-          echo "   dev  → Commentaires préservés pour le développement"
-          echo "   main → Code propre pour la production"
-          echo ""
-          echo "Automatisation : ACTIVE "
-
-  # Job de vérification des permissions (debug)
-  verify-permissions:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-      - name: Verify token permissions
         env:
-          TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
         run: |
-          echo "Vérification des permissions du token..."
-          
-          if [[ -n "$TOKEN" ]]; then
-            echo "Token PORTFOLIO_TOKEN détecté"
-            
-            # Test d'accès à l'API GitHub
-            response=$(curl -s -H "Authorization: token $TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}")
-            
-            if echo "$response" | grep -q '"permissions"'; then
-              echo "Token fonctionnel - accès API confirmé"
-            else
-              echo "Problème potentiel avec le token"
-            fi
+          gh pr create \
+            --title "🧹 [Auto-Clean]: Nettoyage automatique du code de production" \
+            --body "## 🤖 Nettoyage automatique
+
+          Cette PR a été créée automatiquement pour nettoyer le code de production.
+
+          ### 📋 Changements appliqués :
+          - ✅ Suppression des commentaires TODO, DEBUG, INFO
+          - ✅ Nettoyage des console.log de debug  
+          - ✅ Optimisation pour la production
+
+          ### 🛡️ Sécurité :
+          - ✅ Code critique préservé
+          - ✅ Docblocks conservés
+          - ✅ Attributs PHP 8 intacts
+
+          ### ℹ️ Instructions :
+          1. Vérifiez les changements
+          2. Mergez cette PR pour appliquer le nettoyage
+          3. La branche dev reste intacte avec tous vos commentaires
+
+          ---
+          🤖 **Généré automatiquement par GitHub Actions**" \
+            --head "$BRANCH_NAME" \
+            --base main \
+            --label "automated-cleaning" \
+            --label "production"
+
+      - name: Summary
+        run: |
+          if [[ "${{ steps.check_changes.outputs.changes }}" == "true" ]]; then
+            echo "✅ PR de nettoyage créée automatiquement"
+            echo "👀 Vérifiez et mergez la PR pour appliquer les changements"
           else
-            echo "Token PORTFOLIO_TOKEN manquant !"
-            echo "Ajoutez-le dans Settings → Secrets → Actions"
+            echo "✅ Code déjà propre - aucune action nécessaire"
           fi
