@@ -1,4 +1,3 @@
-# Solution contournement : Nettoyage via PR automatique
 name: CI
 
 on:
@@ -13,7 +12,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      - name: Preview smart cleaning (dry-run)
+      - name: Preview smart cleaning
         run: |
           echo "📋 Aperçu du nettoyage intelligent..."
           php scripts/clean-code.php --test
@@ -44,114 +43,21 @@ jobs:
       - name: Run PHP CS Fixer
         run: composer cs-check
 
-      - name: Run PHPStan
+      - name: Run PHPStan  
         run: composer phpstan -vvv
 
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
 
-  # 🤖 Créer une PR automatique de nettoyage
-  create-cleaning-pr:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    permissions:
-      contents: write
-      pull-requests: write
-    
-    steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.PORTFOLIO_TOKEN }}
-          fetch-depth: 0
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml
-
-      - name: Configure Git
+      - name: Post-merge cleaning instructions
+        if: github.event.pull_request.base.ref == 'main'
         run: |
-          git config --local user.email "bot@portfolio.dev"
-          git config --local user.name "Portfolio Cleaner Bot"
-
-      - name: Create cleaning branch
-        run: |
-          timestamp=$(date +%Y%m%d-%H%M%S)
-          git checkout -b "auto-clean-$timestamp"
-          echo "BRANCH_NAME=auto-clean-$timestamp" >> $GITHUB_ENV
-
-      - name: Apply smart cleaning
-        run: |
-          echo "🧹 Nettoyage du code..."
-          php scripts/clean-code.php --apply
-
-      - name: Check and commit changes
-        id: check_changes
-        run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            
-            echo "📊 Fichiers modifiés :"
-            git status --porcelain
-            
-            git add -A
-            git commit -m "🧹 [Auto-Clean]: Code nettoyé pour la production
-
-            📋 Nettoyage automatique :
-            - Suppression des commentaires TODO, DEBUG, INFO
-            - Nettoyage des console.log de debug
-            - Optimisation pour la production
-            
-            🤖 Généré automatiquement par GitHub Actions"
-            
-            git push origin "$BRANCH_NAME"
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "✅ Code déjà propre"
-          fi
-
-      # 🔄 Créer la PR automatique
-      - name: Create Pull Request
-        if: steps.check_changes.outputs.changes == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
-        run: |
-          gh pr create \
-            --title "🧹 [Auto-Clean]: Nettoyage automatique du code de production" \
-            --body "## 🤖 Nettoyage automatique
-
-          Cette PR a été créée automatiquement pour nettoyer le code de production.
-
-          ### 📋 Changements appliqués :
-          - ✅ Suppression des commentaires TODO, DEBUG, INFO
-          - ✅ Nettoyage des console.log de debug  
-          - ✅ Optimisation pour la production
-
-          ### 🛡️ Sécurité :
-          - ✅ Code critique préservé
-          - ✅ Docblocks conservés
-          - ✅ Attributs PHP 8 intacts
-
-          ### ℹ️ Instructions :
-          1. Vérifiez les changements
-          2. Mergez cette PR pour appliquer le nettoyage
-          3. La branche dev reste intacte avec tous vos commentaires
-
-          ---
-          🤖 **Généré automatiquement par GitHub Actions**" \
-            --head "$BRANCH_NAME" \
-            --base main \
-            --label "automated-cleaning" \
-            --label "production"
-
-      - name: Summary
-        run: |
-          if [[ "${{ steps.check_changes.outputs.changes }}" == "true" ]]; then
-            echo "✅ PR de nettoyage créée automatiquement"
-            echo "👀 Vérifiez et mergez la PR pour appliquer les changements"
-          else
-            echo "✅ Code déjà propre - aucune action nécessaire"
-          fi
+          echo "🚀 INSTRUCTIONS POST-MERGE :"
+          echo ""
+          echo "Pour nettoyer automatiquement le code après le merge :"
+          echo "git checkout main && git pull origin main"
+          echo "php scripts/clean-code.php --apply"  
+          echo "git add -A && git commit -m '🧹 Clean production code'"
+          echo "git push origin main"
+          echo ""
+          echo "✅ Ceci nettoiera main tout en gardant dev intac
