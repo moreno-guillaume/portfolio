@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      - name: Preview smart cleaning (dry-run)
+      - name: Preview smart cleaning
         run: |
           echo "📋 Aperçu du nettoyage intelligent..."
           php scripts/clean-code.php --test
@@ -43,7 +43,7 @@ jobs:
       - name: Run PHP CS Fixer
         run: composer cs-check
 
-      - name: Run PHPStan
+      - name: Run PHPStan  
         run: composer phpstan -vvv
 
       - name: Run PHPUnit tests
@@ -171,3 +171,4 @@ jobs:
           echo "👀 Vérifiez et mergez la PR pour finaliser le nettoyage"
 
       # 📊 Résumé de l'autom
+
