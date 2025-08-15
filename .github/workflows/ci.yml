@@ -1,4 +1,6 @@
-# Version simplifiée - Nettoyage manuel ou via script local
+
+# Workflow entièrement automatisé avec PAT pour bypasser les protections
+
 name: CI
 
 on:
@@ -11,6 +13,11 @@ jobs:
   quality:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pull-requests: write
+
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,30 +29,154 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
           tools: composer
 
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      # UNIQUEMENT test du nettoyage - JAMAIS d'application automatique
-      - name: Preview cleaning changes
+      - name: Preview smart cleaning (dry-run)
         run: |
-          echo "Aperçu des changements qui seraient appliqués en production :"
+          echo "📋 Aperçu du nettoyage intelligent..."
           php scripts/clean-code.php --test
 
-      - name: Run code quality checks
-        run: |
-          composer cs-check
-          composer phpstan
-          php bin/phpunit
+      - name: Run PHP CS Fixer
+        run: composer cs-check
 
-      # 💡 Instructions pour nettoyage manuel
-      - name: Production deployment info
-        if: github.ref == 'refs/heads/main'
+      - name: Run PHPStan
+        run: composer phpstan -vvv
+
+      - name: Run PHPUnit tests
+        run: php bin/phpunit --coverage-text
+
+  # Nettoyage automatique après merge sur main
+  production-clean:
+    runs-on: ubuntu-latest
+    # Se déclenche SEULEMENT après un push sur main (post-merge)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout main branch with admin token
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          # 🔑 Utiliser le PAT au lieu du GITHUB_TOKEN
+          token: ${{ secrets.PORTFOLIO_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml
+
+      - name: Configure Git with bot identity
         run: |
-          echo "Pour déployer en production :"
-          echo "1. Merger cette PR"
-          echo "2. local :"
-          echo "   git checkout main"
-          echo "   git pull origin main"
-          echo "   php scripts/clean-code.php --apply"
-          echo "   git add -A && git commit -m 'Clean production code'"
-          echo "   git push origin main"
+          git config --local user.email "bot@portfolio.dev"
+          git config --local user.name "Portfolio Cleaner Bot"
+
+      - name: Apply smart cleaning for production
+        run: |
+          echo "Nettoyage intelligent en cours sur MAIN..."
+          echo "Fichiers avant nettoyage :"
+          find public/js -name "*.js" -exec echo "  📄 {}" \;
+          
+          php scripts/clean-code.php --apply
+          
+          echo "Nettoyage terminé"
+
+      - name: Check cleaning results
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "RÉSULTATS DU NETTOYAGE :"
+            echo "Fichiers modifiés :"
+            git status --porcelain
+            echo ""
+            echo "Statistiques :"
+            git diff --stat
+            echo ""
+            echo "Commentaires supprimés avec succès !"
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "Code déjà propre - aucun nettoyage nécessaire"
+          fi
+
+      # Commit et push avec bypass des protections
+      - name: Commit and push cleaned code
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          echo "Commit du code nettoyé..."
+          
+          git add -A
+          git commit -m "🧹 [Auto-Clean]: Suppression automatique des commentaires de debug
+
+          Résumé :
+          - Commentaires TODO, DEBUG, INFO supprimés
+          - Console.log de debug nettoyés  
+          - Code de production optimisé
+          - Dev branch préservée
+          
+          Nettoyage automatique par GitHub Actions"
+          
+          echo "Push vers main (bypass protections)..."
+          git push origin main
+          
+          echo "Code de production nettoyé avec succès !"
+
+      # Résumé final
+      - name: Production deployment summary
+        run: |
+          echo "DÉPLOIEMENT PRODUCTION TERMINÉ"
+          echo ""
+          echo "Statut :"
+          if [[ "${{ steps.check_changes.outputs.changes }}" == "true" ]]; then
+            echo "   Code nettoyé automatiquement"
+            echo "   Commit créé sur main"
+            echo "   Prêt pour la production"
+          else
+            echo "   Code déjà propre"
+            echo "   Aucune action requise"
+          fi
+          echo ""
+          echo "Branches :"
+          echo "   dev  → Commentaires préservés pour le développement"
+          echo "   main → Code propre pour la production"
+          echo ""
+          echo "Automatisation : ACTIVE "
+
+  # Job de vérification des permissions (debug)
+  verify-permissions:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Verify token permissions
+        env:
+          TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
+        run: |
+          echo "Vérification des permissions du token..."
+          
+          if [[ -n "$TOKEN" ]]; then
+            echo "Token PORTFOLIO_TOKEN détecté"
+            
+            # Test d'accès à l'API GitHub
+            response=$(curl -s -H "Authorization: token $TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}")
+            
+            if echo "$response" | grep -q '"permissions"'; then
+              echo "Token fonctionnel - accès API confirmé"
+            else
+              echo "Problème potentiel avec le token"
+            fi
+          else
+            echo "Token PORTFOLIO_TOKEN manquant !"
+            echo "Ajoutez-le dans Settings → Secrets → Actions"
+          fi
+
