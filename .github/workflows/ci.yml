@@ -1,4 +1,6 @@
+
 # Workflow entièrement automatisé avec PAT pour bypasser les protections
+
 name: CI
 
 on:
@@ -10,9 +12,11 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       pull-requests: write
+
 
     steps:
       - name: Checkout code
@@ -23,8 +27,8 @@ jobs:
         with:
           php-version: '8.2'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
-          coverage: xdebug
           tools: composer
+
 
       - name: Cache Composer packages
         uses: actions/cache@v3
@@ -175,3 +179,4 @@ jobs:
             echo "Token PORTFOLIO_TOKEN manquant !"
             echo "Ajoutez-le dans Settings → Secrets → Actions"
           fi
+
