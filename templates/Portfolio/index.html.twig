@@ -2,19 +2,20 @@
 
 {% block title %}MorenoDev{% endblock %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/network.css') }}">
-{% endblock %}
-
 {% block body %}
+    {# INFO: Canvas de fond pour l'animation de particules #}
     <canvas id="networkCanvas"></canvas>
     
-    <div class="main-content">
-        <h1>Mon Portfolio</h1>
-        <p>Page en construction</p>
-    </div>
+    {# INFO: Container principal de l'application #}
+    <main class="main-container">
+        <div class="content-wrapper">
+            {# TODO: ajouter le contenu du portfolio #}
+        </div>
+    </main>
 {% endblock %}
 
 {% block javascripts %}
-    <script type="module" src="{{ asset('js/index.js') }}"></script>
+    {# INFO: Chargement des assets via Vite en développement #}
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/js/app.js"></script>
 {% endblock %}

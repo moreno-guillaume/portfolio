@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      - name: Preview smart cleaning
+      - name: Preview smart cleaning (dry-run)
         run: |
           echo "📋 Aperçu du nettoyage intelligent..."
           php scripts/clean-code.php --test
@@ -43,13 +43,13 @@ jobs:
       - name: Run PHP CS Fixer
         run: composer cs-check
 
-      - name: Run PHPStan  
+      - name: Run PHPStan
         run: composer phpstan -vvv
 
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
 
-  # 🤖 AUTOMATISATION COMPLÈTE : Création d'une PR de nettoyage
+
   auto-cleaning:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -119,7 +119,9 @@ jobs:
             echo "✅ Code déjà propre - aucun nettoyage nécessaire"
           fi
 
-      # 🚀 Création automatique de la PR
+
+      # 🚀 Création de la PR SANS labels problématiques
+
       - name: Create Cleaning Pull Request
         if: steps.changes.outputs.found == 'true'
         env:
@@ -159,10 +161,8 @@ jobs:
           🔗 **Workflow ID:** \`${{ github.run_id }}\`  
           📅 **Généré le :** \`$(date)\`" \
             --head "$BRANCH_NAME" \
-            --base main \
-            --label "🤖 automated" \
-            --label "🧹 cleaning" \
-            --label "🚀 production")
+            --base main)
+
           
           echo "🎉 PR de nettoyage créée automatiquement !"
           echo "🔗 URL: $pr_url"
@@ -170,5 +170,24 @@ jobs:
           echo "✅ AUTOMATISATION TERMINÉE"
           echo "👀 Vérifiez et mergez la PR pour finaliser le nettoyage"
 
-      # 📊 Résumé de l'autom
+      - name: Automation Summary
+        run: |
+          echo "🎯 RÉSUMÉ DE L'AUTOMATISATION"
+          echo "=============================="
+          echo ""
+          if [[ "${{ steps.changes.outputs.found }}" == "true" ]]; then
+            echo "✅ Code nettoyé automatiquement"
+            echo "🔄 PR créée pour review et merge final"
+            echo "🎯 Action requise: Mergez la PR de nettoyage"
+          else
+            echo "✅ Code déjà propre"
+            echo "🎯 Aucune action requise"
+          fi
+          echo ""
+          echo "🛡️ Sécurité:"
+          echo "   • Dev branch intacte avec tous les commentaires"
+          echo "   • Code critique préservé"  
+          echo "   • Review possible avant application"
+          echo ""
+          echo "🤖 Automatisation: ACTIVE ✅"
 
