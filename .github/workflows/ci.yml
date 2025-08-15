@@ -1,3 +1,4 @@
+# Version simplifiée - Nettoyage manuel ou via script local
 name: CI
 
 on:
@@ -9,85 +10,42 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
-          coverage: xdebug
           tools: composer
 
-      - name: Cache Composer packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache/files
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
-
-      - name: Install dependencies (dev included)
+      - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
-      - name: Test smart cleaning (dry-run)
+      # UNIQUEMENT test du nettoyage - JAMAIS d'application automatique
+      - name: Preview cleaning changes
         run: |
-          echo "Test du nettoyage intelligent..."
+          echo "Aperçu des changements qui seraient appliqués en production :"
           php scripts/clean-code.php --test
 
-      - name: Apply smart cleaning for production
-        if: github.event.pull_request.base.ref == 'main'
+      - name: Run code quality checks
         run: |
-          echo "Application du nettoyage intelligent pour la production..."
-          php scripts/clean-code.php --apply
+          composer cs-check
+          composer phpstan
+          php bin/phpunit
 
-      - name: Check cleaning results
-        if: github.event.pull_request.base.ref == 'main'
-        id: check_changes
+      # 💡 Instructions pour nettoyage manuel
+      - name: Production deployment info
+        if: github.ref == 'refs/heads/main'
         run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "Modifications appliquées par le nettoyage intelligent :"
-            git diff --stat
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "Aucun commentaire de debug ou info trouvé - Code déjà propre !"
-          fi
-
-      - name: Commit cleaned code
-        if: github.event.pull_request.base.ref == 'main' && steps.check_changes.outputs.changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: '[Smart Clean]: Suppression des commentaires de debug et info pour la production'
-          commit_user_name: 'Smart Code Cleaner'
-          commit_user_email: 'action@github.com'
-
-      - name: Check PHPStan availability
-        run: vendor/bin/phpstan --version
-
-      - name: Run PHP CS Fixer
-        run: composer cs-check
-
-      - name: Run PHPStan (verbose)
-        run: composer phpstan -vvv
-
-      - name: Run PHPUnit tests
-        run: php bin/phpunit --coverage-text
-
-      - name: Production ready summary
-        if: github.event.pull_request.base.ref == 'main'
-        run: |
-          echo "Portfolio prêt pour la production"
-          echo "Nettoyage intelligent appliqué"
-          echo "Code critique préservé"
-          echo "Standards de code respectés"
-          echo "Tests passés"
+          echo "Pour déployer en production :"
+          echo "1. Merger cette PR"
+          echo "2. local :"
+          echo "   git checkout main"
+          echo "   git pull origin main"
+          echo "   php scripts/clean-code.php --apply"
+          echo "   git add -A && git commit -m 'Clean production code'"
+          echo "   git push origin main"
