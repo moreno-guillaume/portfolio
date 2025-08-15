@@ -5,14 +5,13 @@ export class CanvasManager {
 
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
-
             throw new Error(`Canvas avec l'ID "${canvasId}" introuvable`);
         }
 
-        
+
         this.ctx = this.canvas.getContext('2d');
 
-        
+
         this.setupCanvas();
     }
 
@@ -28,20 +27,20 @@ export class CanvasManager {
 
     getWidth()
     {
-        
+
         return this.canvas.width;
     }
 
     getHeight()
     {
-        
+
         return this.canvas.height;
     }
 
     clear()
     {
-        
-        
+
+
         this.ctx.fillStyle = '#F1F4F7';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -56,17 +55,16 @@ export class CanvasManager {
             const pointA = points[connection.from];
             const pointB = points[connection.to];
 
-            
-            if (!pointA || !pointB) {
 
+            if (!pointA || !pointB) {
                 return;
             }
 
             this.ctx.beginPath();
             this.ctx.moveTo(pointA.x, pointA.y);
             this.ctx.lineTo(pointB.x, pointB.y);
-            
-            
+
+
             this.ctx.strokeStyle = `rgba(94, 94, 94, ${connection.opacity})`;
             this.ctx.lineWidth = 1;
             this.ctx.stroke();
@@ -80,15 +78,14 @@ export class CanvasManager {
 
 
         points.forEach((point, index) => {
-            
-            if (point.x < 0 || point.y < 0) {
 
+            if (point.x < 0 || point.y < 0) {
             }
-            
+
             this.ctx.beginPath();
-            
+
             this.ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
-            this.ctx.fillStyle = '#5E5E5E'; 
+            this.ctx.fillStyle = '#5E5E5E';
             this.ctx.fill();
         });
 
@@ -108,16 +105,15 @@ export class CanvasManager {
 
     onResize(callback)
     {
-        
+
         window.addEventListener('resize', () => {
 
-            
+
             this.setupCanvas();
-            
-            
+
+
             if (typeof callback === 'function') {
                 callback();
-
             }
         });
 

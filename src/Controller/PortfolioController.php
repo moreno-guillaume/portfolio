@@ -8,7 +8,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class PortfolioController extends AbstractController
 {
-
     #[Route('/', name: 'portfolio_index')]
     public function index(): Response
     {

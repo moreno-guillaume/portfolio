@@ -12,17 +12,17 @@ export class NetworkBackground {
             this.canvasManager.getHeight()
         );
 
-        
+
         this.points = [];
         this.connections = [];
         this.animationId = null;
         this.startTime = Date.now();
 
 
-        this.maxDistance = 120; 
-        this.mouse = { x: 0, y: 0 }; 
-        this.mouseInfluenceRadius = 120; 
-        this.mouseInfluenceStrength = 30; 
+        this.maxDistance = 120;
+        this.mouse = { x: 0, y: 0 };
+        this.mouseInfluenceRadius = 120;
+        this.mouseInfluenceStrength = 30;
 
 
         this.init();
@@ -34,7 +34,7 @@ export class NetworkBackground {
 
         this.points = this.pointGenerator.generateStrategicPoints();
 
-        
+
         this.setupMouseEvents();
         this.setupResizeEvents();
         this.startAnimation();
@@ -44,14 +44,13 @@ export class NetworkBackground {
 
     setupMouseEvents()
     {
-        
+
         document.addEventListener('mousemove', (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
-            
-            
-            if (Math.random() < 0.01) { 
 
+
+            if (Math.random() < 0.01) {
             }
         });
 
@@ -60,7 +59,7 @@ export class NetworkBackground {
 
     setupResizeEvents()
     {
-        
+
         this.canvasManager.onResize(() => {
 
 
@@ -69,19 +68,19 @@ export class NetworkBackground {
                 this.canvasManager.getHeight()
             );
 
-            
+
             this.points = this.pointGenerator.generateStrategicPoints();
 
 
         });
-        
+
 
     }
 
     calculateConnections()
     {
-        
-        
+
+
         this.connections = [];
         let connectionsCalculated = 0;
 
@@ -90,23 +89,22 @@ export class NetworkBackground {
                 const pointA = this.points[i];
                 const pointB = this.points[j];
 
-                
+
                 const dx = pointA.x - pointB.x;
                 const dy = pointA.y - pointB.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < this.maxDistance) {
-                    
                     let opacity = (1 - distance / this.maxDistance) * 0.5;
 
-                    
+
                     const midX = (pointA.x + pointB.x) / 2;
                     const midY = (pointA.y + pointB.y) / 2;
                     const mouseDistanceToLine = Math.sqrt(
                         Math.pow(this.mouse.x - midX, 2) + Math.pow(this.mouse.y - midY, 2)
                     );
 
-                    
+
                     if (mouseDistanceToLine < this.mouseInfluenceRadius) {
                         const mouseInfluence = 1 - (mouseDistanceToLine / this.mouseInfluenceRadius);
                         opacity += mouseInfluence * 0.3;
@@ -115,17 +113,16 @@ export class NetworkBackground {
                     this.connections.push({
                         from: i,
                         to: j,
-                        opacity: Math.min(opacity, 0.8) 
+                        opacity: Math.min(opacity, 0.8)
                     });
-                    
+
                     connectionsCalculated++;
                 }
             }
         }
-        
-        
-        if (Math.random() < 0.1) { 
 
+
+        if (Math.random() < 0.1) {
         }
 
 
@@ -133,10 +130,10 @@ export class NetworkBackground {
 
     animate()
     {
-        
+
         const frameStart = performance.now();
 
-        
+
         this.pointGenerator.updatePoints(
             this.points,
             this.startTime,
@@ -145,22 +142,20 @@ export class NetworkBackground {
             this.mouseInfluenceStrength
         );
 
-        
+
         this.calculateConnections();
 
-        
+
         this.canvasManager.draw(this.connections, this.points);
 
-        
+
         const frameTime = performance.now() - frameStart;
-        if (Math.random() < 0.01) { 
-
-            if (frameTime > 16.67) { 
-
+        if (Math.random() < 0.01) {
+            if (frameTime > 16.67) {
             }
         }
 
-        
+
         this.animationId = requestAnimationFrame(() => this.animate());
 
 
@@ -171,31 +166,28 @@ export class NetworkBackground {
 
 
         if (this.animationId) {
-
             this.stopAnimation();
         }
-        
+
         this.animate();
 
     }
 
     stopAnimation()
     {
-        
+
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
-
         } else {
-
         }
     }
 
-    
+
     destroy()
     {
 
-        
+
         this.stopAnimation();
 
 

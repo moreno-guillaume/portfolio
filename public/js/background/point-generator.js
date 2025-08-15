@@ -6,9 +6,9 @@ export class PointGenerator {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
 
-        
-        this.margin = 80; 
-        this.cornerSize = 200; 
+
+        this.margin = 80;
+        this.cornerSize = 200;
 
 
     }
@@ -19,44 +19,42 @@ export class PointGenerator {
 
         this.canvasWidth = width;
         this.canvasHeight = height;
-        
-        
-        if (width <= 0 || height <= 0) {
 
+
+        if (width <= 0 || height <= 0) {
         }
     }
 
     createPoint(x, y, zone = 'aléatoire')
     {
-        
-        const point = {
-            baseX: x, 
-            baseY: y,
-            x: x, 
-            y: y,
-            size: Math.random() * 2 + 0.5, 
-            speed: Math.random() * 0.7 + 0.5, 
-            phaseX: Math.random() * Math.PI * 2, 
-            phaseY: Math.random() * Math.PI * 2, 
-            zone: zone 
-        };
-        
-        
-        if (Math.random() < 0.05) { 
 
+        const point = {
+            baseX: x,
+            baseY: y,
+            x: x,
+            y: y,
+            size: Math.random() * 2 + 0.5,
+            speed: Math.random() * 0.7 + 0.5,
+            phaseX: Math.random() * Math.PI * 2,
+            phaseY: Math.random() * Math.PI * 2,
+            zone: zone
+        };
+
+
+        if (Math.random() < 0.05) {
         }
-        
+
         return point;
     }
 
     generateStrategicPoints()
     {
-        
+
 
         const points = [];
 
 
-        const topLeftCount = Math.floor(Math.random() * 2) + 4; 
+        const topLeftCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topLeftCount; i++) {
             points.push(this.createPoint(
                 this.margin + Math.random() * this.cornerSize,
@@ -65,7 +63,7 @@ export class PointGenerator {
             ));
         }
 
-        
+
         const topRightCount = Math.floor(Math.random() * 2) + 4;
         for (let i = 0; i < topRightCount; i++) {
             points.push(this.createPoint(
@@ -84,7 +82,7 @@ export class PointGenerator {
             ));
         }
 
-        
+
         for (let i = 0; i < 2; i++) {
             points.push(this.createPoint(
                 this.canvasWidth - this.margin - 50 + Math.random() * 50,
@@ -103,7 +101,7 @@ export class PointGenerator {
             ));
         }
 
-        
+
         const bottomBorderCount = Math.floor(Math.random() * 2) + 1;
         for (let i = 0; i < bottomBorderCount; i++) {
             points.push(this.createPoint(
@@ -115,7 +113,7 @@ export class PointGenerator {
 
 
         const currentCount = points.length;
-        const targetTotal = 185; 
+        const targetTotal = 185;
         const randomPointsToAdd = Math.max(0, targetTotal - currentCount);
 
 
@@ -139,21 +137,20 @@ export class PointGenerator {
 
     updatePoints(points, startTime, mouse, mouseInfluenceRadius, mouseInfluenceStrength)
     {
-        
-        const time = (Date.now() - startTime) * 0.001; 
-        
-        
-        if (Math.random() < 0.001) { 
 
+        const time = (Date.now() - startTime) * 0.001;
+
+
+        if (Math.random() < 0.001) {
         }
 
         points.forEach((point, index) => {
-            
-            
+
+
             const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
             const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
 
-            
+
             const dx = mouse.x - point.baseX;
             const dy = mouse.y - point.baseY;
             const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
@@ -162,34 +159,31 @@ export class PointGenerator {
             let mouseOffsetY = 0;
 
             if (distanceToMouse < mouseInfluenceRadius) {
-                
                 const influence = 1 - (distanceToMouse / mouseInfluenceRadius);
-                const angle = Math.atan2(dy, dx); 
-                
-                
+                const angle = Math.atan2(dy, dx);
+
+
                 const forceX = Math.cos(angle) * influence * mouseInfluenceStrength;
                 const forceY = Math.sin(angle) * influence * mouseInfluenceStrength;
 
-                
+
                 mouseOffsetX = -forceX;
                 mouseOffsetY = -forceY;
-                
-                
-                if (Math.random() < 0.001 && influence > 0.5) {
 
+
+                if (Math.random() < 0.001 && influence > 0.5) {
                 }
             }
 
-            
+
             point.x = point.baseX + offsetX + mouseOffsetX;
             point.y = point.baseY + offsetY + mouseOffsetY;
-            
-            
-            if (point.x < -50 || point.x > this.canvasWidth + 50 || 
-                point.y < -50 || point.y > this.canvasHeight + 50) {
-                if (Math.random() < 0.01) { 
 
-                }
+
+            if (point.x < -50 || point.x > this.canvasWidth + 50 ||
+                point.y < -50 || point.y > this.canvasHeight + 50) {
+            if (Math.random() < 0.01) {
+            }
             }
         });
 
