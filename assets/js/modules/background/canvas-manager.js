@@ -1,6 +1,5 @@
 export class CanvasManager {
-    constructor(canvasId)
-    {
+    constructor(canvasId) {
         // INFO: CanvasManager gère l'affichage et les opérations de rendu du canvas HTML5
         console.log('info: Initialisation du CanvasManager avec canvas ID:', canvasId);
         
@@ -14,11 +13,37 @@ export class CanvasManager {
         this.ctx = this.canvas.getContext('2d');
         console.log('info: Contexte 2D obtenu avec succès');
         
+        // INFO: Récupération des couleurs depuis les variables CSS
+        this.colors = this.getThemeColors();
+        
         this.setupCanvas();
     }
 
-    setupCanvas()
-    {
+    getThemeColors() {
+        // INFO: Lecture des variables CSS définies dans SCSS
+        const rootStyles = getComputedStyle(document.documentElement);
+        
+        const colors = {
+            background: rootStyles.getPropertyValue('--canvas-background').trim(),
+            points: rootStyles.getPropertyValue('--canvas-points').trim(),
+            connections: rootStyles.getPropertyValue('--canvas-connections').trim()
+        };
+        
+        // DEBUG: affichage des couleurs du thème
+        console.log('debug: Couleurs du thème chargées:', colors);
+        
+        // INFO: Fallback si les variables CSS ne sont pas disponibles
+        if (!colors.background) {
+            console.warn('debug: Variables CSS non disponibles, utilisation des couleurs par défaut');
+            colors.background = '#D3DDE4';
+            colors.points = '#5E5E5E';
+            colors.connections = 'rgba(94, 94, 94, 1)';
+        }
+        
+        return colors;
+    }
+
+    setupCanvas() {
         // INFO: Dimensionne le canvas à la taille complète de la fenêtre pour un effet plein écran
         console.log('debug: Configuration canvas - dimensions avant:', this.canvas.width, 'x', this.canvas.height);
         
@@ -31,31 +56,16 @@ export class CanvasManager {
         // INFO: Pour les écrans Retina, multiplier les dimensions par devicePixelRatio
     }
 
-    getWidth()
-    {
-        // INFO: Retourne la largeur actuelle du canvas en pixels
-        return this.canvas.width;
-    }
-
-    getHeight()
-    {
-        // INFO: Retourne la hauteur actuelle du canvas en pixels
-        return this.canvas.height;
-    }
-
-    clear()
-    {
-        // INFO: Efface complètement le canvas avec une couleur de fond définie
-        // INFO: Couleur #F1F4F7 = gris très clair pour un arrière-plan neutre
-        this.ctx.fillStyle = '#F1F4F7';
+    clear() {
+        // INFO: Efface complètement le canvas avec la couleur de fond du thème
+        this.ctx.fillStyle = this.colors.background;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // DEBUG: Vérifier que le canvas est bien effacé
-        console.log('debug: Canvas effacé avec couleur #F1F4F7');
+        // DEBUG: confirmation de l'effacement avec la couleur thématique
+        console.log('debug: Canvas effacé avec couleur thématique:', this.colors.background);
     }
 
-    drawConnections(connections, points)
-    {
+    drawConnections(connections, points) {
         // INFO: Dessine les connexions entre les points avec opacité variable selon la distance
         console.log('debug: Rendu de', connections.length, 'connexions');
         
@@ -73,7 +83,7 @@ export class CanvasManager {
             this.ctx.moveTo(pointA.x, pointA.y);
             this.ctx.lineTo(pointB.x, pointB.y);
             
-            // INFO: Utilise rgba pour l'opacité dynamique basée sur la distance et l'interaction souris
+            // INFO: Utilise la couleur thématique avec opacité dynamique
             this.ctx.strokeStyle = `rgba(94, 94, 94, ${connection.opacity})`;
             this.ctx.lineWidth = 1;
             this.ctx.stroke();
@@ -83,8 +93,7 @@ export class CanvasManager {
         console.log('debug: Connexions rendues avec succès:', connections.length);
     }
 
-    drawPoints(points)
-    {
+    drawPoints(points) {
         // INFO: Dessine les points comme des cercles pleins avec taille variable
         console.log('debug: Rendu de', points.length, 'points');
         
@@ -97,7 +106,9 @@ export class CanvasManager {
             this.ctx.beginPath();
             // INFO: arc(x, y, radius, startAngle, endAngle) - cercle complet avec Math.PI * 2
             this.ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
-            this.ctx.fillStyle = '#5E5E5E'; // INFO: Gris moyen pour la visibilité
+            
+            // INFO: Utilise la couleur thématique pour les points
+            this.ctx.fillStyle = this.colors.points;
             this.ctx.fill();
         });
         
@@ -105,8 +116,23 @@ export class CanvasManager {
         console.log('debug: Points rendus avec succès:', points.length);
     }
 
-    draw(connections, points)
-    {
+    // INFO: Méthode pour mettre à jour les couleurs dynamiquement
+    updateThemeColors() {
+        console.log('info: Mise à jour des couleurs thématiques');
+        this.colors = this.getThemeColors();
+    }
+
+    getWidth() {
+        // INFO: Retourne la largeur actuelle du canvas en pixels
+        return this.canvas.width;
+    }
+
+    getHeight() {
+        // INFO: Retourne la hauteur actuelle du canvas en pixels
+        return this.canvas.height;
+    }
+
+    draw(connections, points) {
         // INFO: Méthode principale de rendu - efface puis dessine connexions et points
         // INFO: Ordre important: fond → connexions → points (pour la superposition)
         console.log('debug: Début du cycle de rendu');
@@ -120,8 +146,7 @@ export class CanvasManager {
         // TODO: Ajouter un profiler de performance pour mesurer le FPS
     }
 
-    onResize(callback)
-    {
+    onResize(callback) {
         // INFO: Écoute les changements de taille de fenêtre pour maintenir le canvas plein écran
         window.addEventListener('resize', () => {
             console.log('debug: Redimensionnement détecté');

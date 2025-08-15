@@ -1,0 +1,31 @@
+/* INFO: Container principal de l'application */
+.main-container {
+  position: relative;
+  padding-top: 18%;
+  width: 100%;
+  height: 100vh;
+  @include flex-center;
+  z-index: $z-content;
+  /* INFO: Permet l'interaction avec le canvas de fond */
+  pointer-events: none;
+}
+
+.content-wrapper {
+  min-width: 70%;
+  /* INFO: Assure la visibilité du container */
+  min-height: 200%;
+  padding: $spacing-lg;
+  text-align: center;
+  /* INFO: Restaure l'interaction pour le contenu */
+  pointer-events: auto;
+  
+  /* INFO: Effet glassmorphism subtil */
+  @include glassmorphism(0.5);
+  border-radius: $border-radius-md;
+  
+  /* TEMP: bordure debug pour visualiser les limites */
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  
+  /* TODO: ajouter des animations d'entrée */
+  /* TODO: optimiser pour les écrans haute résolution */
+}

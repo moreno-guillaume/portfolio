@@ -1,0 +1,17 @@
+// =================================
+// APPLICATION STYLES - VERSION SIMPLE
+// =================================
+
+// Abstracts
+@import "abstracts/variables";
+@import "abstracts/mixins";
+
+// Base
+@import "base/reset";
+
+// Layout uniquement
+@import "layout/container";
+
+// Les components seront réactivés plus tard
+// @import "components/hero";
+// @import "components/navigation";
