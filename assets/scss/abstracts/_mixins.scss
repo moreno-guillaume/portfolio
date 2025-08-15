@@ -3,7 +3,7 @@
 // =================================
 
 // Glassmorphism effect
-@mixin glassmorphism($opacity: 0.95, $blur: $glass-blur) {
+@mixin glassmorphism($opacity: 0.98, $blur: $glass-blur) {
   background: rgba(255, 255, 255, $opacity);
   backdrop-filter: blur($blur);
   border: $glass-border;

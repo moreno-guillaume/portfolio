@@ -7,8 +7,8 @@ $primary-color: #3498db;
 $secondary-color: #2c3e50;
 $text-color: #5a6c7d;
 $text-dark: #2c3e50;
-$background-white: rgba(255, 255, 255, 0.95);
-$background-glass: rgba(255, 255, 255, 1);
+$background-white: #ffffff;
+$background-glass: rgb(255, 255, 255);
 $shadow-light: rgba(0, 0, 0, 0.1);
 $shadow-medium: rgba(0, 0, 0, 0.15);
 
@@ -52,4 +52,21 @@ $transition-slow: 0.5s ease;
 
 // Glass effect
 $glass-blur: 10px;
-$glass-border: 1px solid rgba(255, 255, 255, 0.1);
+$glass-border: 1px solid rgba(255, 255, 255, 1);
+
+// INFO: Variables de couleurs pour le thème
+$canvas-background: #e3ecf0; 
+$canvas-points: #5E5E5E;
+$canvas-connections: rgba(94, 94, 94, 1);
+
+// INFO: Export des variables vers CSS custom properties pour JavaScript
+:root {
+  --canvas-background: #{$canvas-background};
+  --canvas-points: #{$canvas-points};
+  --canvas-connections: #{$canvas-connections};
+  
+  // TODO: ajouter d'autres couleurs thématiques
+  --primary-color: #{$primary-color};
+  --secondary-color: #{$secondary-color};
+  --text-color: #{$text-color};
+}
