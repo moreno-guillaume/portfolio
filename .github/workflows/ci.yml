@@ -49,6 +49,7 @@ jobs:
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
 
+
   auto-cleaning:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -118,7 +119,9 @@ jobs:
             echo "✅ Code déjà propre - aucun nettoyage nécessaire"
           fi
 
+
       # 🚀 Création de la PR SANS labels problématiques
+
       - name: Create Cleaning Pull Request
         if: steps.changes.outputs.found == 'true'
         env:
@@ -159,6 +162,7 @@ jobs:
           📅 **Généré le :** \`$(date)\`" \
             --head "$BRANCH_NAME" \
             --base main)
+
           
           echo "🎉 PR de nettoyage créée automatiquement !"
           echo "🔗 URL: $pr_url"
@@ -186,3 +190,4 @@ jobs:
           echo "   • Review possible avant application"
           echo ""
           echo "🤖 Automatisation: ACTIVE ✅"
+
