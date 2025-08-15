@@ -1,7 +1,7 @@
 /* INFO: Container principal de l'application */
 .main-container {
   position: relative;
-  padding-top: 20%;
+  padding-top: 18%;
   width: 100%;
   height: 100vh;
   @include flex-center;
@@ -20,7 +20,7 @@
   pointer-events: auto;
   
   /* INFO: Effet glassmorphism subtil */
-  @include glassmorphism(0.1);
+  @include glassmorphism(0.5);
   border-radius: $border-radius-md;
   
   /* TEMP: bordure debug pour visualiser les limites */
