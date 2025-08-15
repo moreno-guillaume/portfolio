@@ -60,4 +60,4 @@ jobs:
           echo "git add -A && git commit -m '🧹 Clean production code'"
           echo "git push origin main"
           echo ""
-          echo "✅ Ceci nettoiera main tout en gardant dev intac
+          echo "✅ Ceci nettoiera main tout en gardant dev intact !"
