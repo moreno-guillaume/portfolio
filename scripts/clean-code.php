@@ -12,12 +12,12 @@
 
 class SmartCodeCleaner
 {
-    private array $targetDirectories = [
-        'src/Controller',           
-        'templates',                
-        'public/css',               
-        'public/js',                
-    ];
+   private array $targetDirectories = [
+    'src/Controller',           
+    'templates',                
+    'assets/js',                // Remplace public/js
+    'assets/scss',              // Remplace public/css
+];
 
     // Dossiers explicitement exclus du nettoyage
     private array $excludedDirectories = [
@@ -72,6 +72,15 @@ class SmartCodeCleaner
             '/\{\#\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\#\}/m',
             '/\{\#\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\#\}/m',
         ],
+        'scss' => [
+        // Commentaires SCSS avec mots-clés de debug et info
+        '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+        '/\/\*\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
+        
+        // Commentaires // en SCSS
+        '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+        '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
+    ]
     ];
 
     private bool $dryRun = false;
