@@ -1,5 +1,5 @@
 
-// INFO: gestionnaire principal du canvas pour l'animation de particules
+
 export class CanvasManager {
 
     constructor(canvasId) {
@@ -12,14 +12,14 @@ export class CanvasManager {
 
         // INFO: initialisation du contexte 2D pour le rendu graphique
         this.ctx = this.canvas.getContext('2d');
-        // INFO: récupération des couleurs depuis les variables CSS pour le theming
+
 
         this.colors = this.getThemeColors();
         
         this.setupCanvas();
     }
 
-    // INFO: récupère les couleurs du thème depuis les variables CSS personnalisées
+
 
     getThemeColors() {
         // INFO: accès aux propriétés CSS calculées de l'élément racine
@@ -30,6 +30,10 @@ export class CanvasManager {
             points: rootStyles.getPropertyValue('--canvas-points').trim(),
             connections: rootStyles.getPropertyValue('--canvas-connections').trim()
         };
+
+
+
+        if (!colors.background) {
 
 
         // INFO: couleurs de fallback si les variables CSS ne sont pas définies
@@ -45,7 +49,9 @@ export class CanvasManager {
     }
 
 
+
     // INFO: configure les dimensions du canvas pour correspondre à la fenêtre
+
     setupCanvas() {
         // INFO: ajustement du canvas à la taille complète de la fenêtre
         this.canvas.width = window.innerWidth;
@@ -62,6 +68,7 @@ export class CanvasManager {
 
     // INFO: efface le canvas en le remplissant avec la couleur de fond
 
+
     clear() {
         // INFO: utilisation de fillRect pour effacer tout le canvas d'un coup
         this.ctx.fillStyle = this.colors.background;
@@ -69,9 +76,11 @@ export class CanvasManager {
     }
 
 
+
     // INFO: dessine toutes les connexions entre les points avec opacité variable
     drawConnections(connections, points) {
         // INFO: itération sur toutes les connexions calculées
+
 
         connections.forEach((connection, index) => {
             const pointA = points[connection.from];
@@ -84,14 +93,18 @@ export class CanvasManager {
             }
 
 
+
             // INFO: tracé d'une ligne entre les deux points
+
 
             this.ctx.beginPath();
             this.ctx.moveTo(pointA.x, pointA.y);
             this.ctx.lineTo(pointB.x, pointB.y);
 
 
+
             // INFO: application de l'opacité dynamique pour l'effet visuel
+
 
             this.ctx.strokeStyle = `rgba(94, 94, 94, ${connection.opacity})`;
             this.ctx.lineWidth = 1;
@@ -100,9 +113,11 @@ export class CanvasManager {
     }
 
 
+
     // INFO: dessine tous les points/particules sur le canvas
     drawPoints(points) {
         // INFO: rendu de chaque point avec sa taille et position
+
 
         points.forEach((point, index) => {
             // DEBUG: vérification de la validité des coordonnées
@@ -112,6 +127,7 @@ export class CanvasManager {
             
 
             // INFO: création d'un cercle pour représenter le point
+
 
             this.ctx.beginPath();
             this.ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
@@ -123,7 +139,9 @@ export class CanvasManager {
     }
 
 
+
     // INFO: met à jour les couleurs du thème en temps réel
+
     updateThemeColors() {
         // INFO: recharge les couleurs depuis les variables CSS actuelles
         this.colors = this.getThemeColors();
@@ -132,20 +150,24 @@ export class CanvasManager {
 
     // INFO: retourne la largeur actuelle du canvas
 
+
     getWidth() {
         return this.canvas.width;
     }
 
     // INFO: retourne la hauteur actuelle du canvas
 
+
     getHeight() {
         return this.canvas.height;
     }
 
 
+
     // INFO: fonction principale de rendu appelée à chaque frame
     draw(connections, points) {
         // INFO: séquence de rendu complète : effacement puis dessin
+
 
         this.clear();
         this.drawConnections(connections, points);
@@ -154,6 +176,7 @@ export class CanvasManager {
 
 
     // INFO: configure l'événement de redimensionnement avec callback personnalisé
+
     onResize(callback) {
         // INFO: écoute des événements de redimensionnement de la fenêtre
         window.addEventListener('resize', () => {

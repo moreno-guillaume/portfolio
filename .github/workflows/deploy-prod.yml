@@ -20,8 +20,7 @@ jobs:
     - name: Verifier si le code est nettoye
       id: check
       run: |
-        # INFO: vérification que le workflow ci.yml a bien nettoyé le code avant déploiement
-        # DEBUG: exclusion des fichiers .github/ qui peuvent contenir des mots-clés techniques
+
         if grep -r "// TODO\|// DEBUG\|// INFO\|console\.log.*debug" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github . >/dev/null 2>&1; then
 
           echo "is-clean=false" >> $GITHUB_OUTPUT

@@ -1,15 +1,19 @@
 
+
 // INFO: Générateur de points pour l'animation de réseau de particules
 export class PointGenerator {
     constructor(canvasWidth, canvasHeight)
     {
         // INFO: Dimensions du canvas pour calculer les positions des points
 
+
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
 
         // INFO: Marges pour éviter que les points apparaissent trop près des bords
         this.margin = 80; 
+
+
 
         // INFO: Taille des zones de coin où concentrer plus de points
 
@@ -21,7 +25,9 @@ export class PointGenerator {
 
     updateCanvasDimensions(width, height)
     {
+
         // INFO: Mise à jour des dimensions quand le canvas est redimensionné
+
 
         this.canvasWidth = width;
         this.canvasHeight = height;
@@ -49,7 +55,9 @@ export class PointGenerator {
         
         // TODO: Ajouter des points spéciaux avec des propriétés différentes
         if (Math.random() < 0.05) { 
+
             // TEMP: 5% de chance d'avoir un point spécial (à implémenter)
+
 
         }
         
@@ -59,10 +67,12 @@ export class PointGenerator {
     generateStrategicPoints()
     {
 
+
         // INFO: Génération stratégique des points pour un rendu équilibré
         const points = [];
 
         // INFO: Concentration de points dans les coins pour un effet visuel attrayant
+
 
         const topLeftCount = Math.floor(Math.random() * 2) + 4; 
         for (let i = 0; i < topLeftCount; i++) {
@@ -86,6 +96,7 @@ export class PointGenerator {
 
         // INFO: Points sur les bords pour créer des connexions intéressantes
 
+
         for (let i = 0; i < 2; i++) {
             points.push(this.createPoint(
                 this.margin + Math.random() * 50,
@@ -104,7 +115,9 @@ export class PointGenerator {
         }
 
 
+
         // INFO: Points sur les bords horizontaux
+
 
         const topBorderCount = Math.floor(Math.random() * 2) + 1;
         for (let i = 0; i < topBorderCount; i++) {
@@ -126,14 +139,18 @@ export class PointGenerator {
         }
 
 
+
         // INFO: Remplissage avec des points aléatoires pour atteindre le nombre cible
+
 
         const currentCount = points.length;
         const targetTotal = 185; // TODO: Rendre ce nombre configurable
         const randomPointsToAdd = Math.max(0, targetTotal - currentCount);
 
 
+
         // DEBUG: Affichage du nombre de points générés par zone
+
 
         for (let i = 0; i < randomPointsToAdd; i++) {
             points.push(this.createPoint(
@@ -144,7 +161,9 @@ export class PointGenerator {
         }
 
 
+
         // DEBUG: Statistiques de répartition des points par zone
+
 
         const zoneStats = {};
         points.forEach(point => {
@@ -159,12 +178,17 @@ export class PointGenerator {
     {
         // INFO: Animation des points avec mouvement naturel et interaction souris
         const time = (Date.now() - startTime) * 0.001; // Temps en secondes
+
+
+        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
         
+
 
         // DEBUG: Affichage périodique du nombre de points animés
 
         const time = (Date.now() - startTime) * 0.001; // Temps en secondes
         
+
      
         if (Math.random() < 0.001) { 
             console.log('debug: Animation de', points.length, 'points');
@@ -172,7 +196,9 @@ export class PointGenerator {
 
         points.forEach((point, index) => {
 
+
             // INFO: Mouvement naturel sinusoïdal autour de la position de base
+
 
             const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
             const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
@@ -190,8 +216,10 @@ export class PointGenerator {
                 const influence = 1 - (distanceToMouse / mouseInfluenceRadius);
                 const angle = Math.atan2(dy, dx); // Angle depuis la souris vers le point
 
+
                 
                 // INFO: Calcul de la force de répulsion basée sur la distance
+
                 const forceX = Math.cos(angle) * influence * mouseInfluenceStrength;
                 const forceY = Math.sin(angle) * influence * mouseInfluenceStrength;
 

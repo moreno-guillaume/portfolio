@@ -7,7 +7,9 @@ import { PointGenerator } from './point-generator.js';
 export class NetworkBackground {
     constructor()
     {
+
         // INFO: initialisation des gestionnaires principaux
+
 
         this.canvasManager = new CanvasManager('networkCanvas');
         this.pointGenerator = new PointGenerator(
@@ -20,6 +22,7 @@ export class NetworkBackground {
         this.connections = [];
         this.animationId = null;
         this.startTime = Date.now();
+
 
 
         // INFO: configuration des paramètres visuels pour l'interaction
@@ -35,7 +38,9 @@ export class NetworkBackground {
     // INFO: initialise le système complet d'animation avec tous ses composants
     init()
     {
+
         // TODO: ajouter une option pour désactiver l'animation sur mobile pour optimiser les performances
+
 
         this.points = this.pointGenerator.generateStrategicPoints();
 
@@ -46,7 +51,9 @@ export class NetworkBackground {
     }
 
 
+
     // INFO: configuration de la détection des mouvements de souris pour l'interactivité
+
 
     setupMouseEvents()
     {
@@ -64,12 +71,15 @@ export class NetworkBackground {
 
     // INFO: gestion du redimensionnement de la fenêtre pour maintenir l'aspect visuel
 
+
     setupResizeEvents()
     {
         // INFO: recalcul automatique des dimensions lors du redimensionnement
         this.canvasManager.onResize(() => {
 
+
             // INFO: updateCanvasDimensions recalcule la grille de points pour maintenir une densité constante
+
 
             this.pointGenerator.updateCanvasDimensions(
                 this.canvasManager.getWidth(),
@@ -82,7 +92,9 @@ export class NetworkBackground {
     }
 
 
+
     // INFO: calcule les connexions entre points proches selon la distance maximum définie
+
     calculateConnections()
     {
         // INFO: réinitialisation du tableau des connexions à chaque frame
@@ -133,7 +145,9 @@ export class NetworkBackground {
         // DEBUG: surveillance des performances de calcul des connexions
         if (Math.random() < 0.1) { 
 
+
             console.log('debug: connexions calculées', { 
+
 
                 total: connectionsCalculated, 
                 points: this.points.length,
@@ -143,7 +157,9 @@ export class NetworkBackground {
     }
 
 
+
     // INFO: boucle principale d'animation utilisant requestAnimationFrame pour la fluidité
+
 
     animate()
     {
@@ -169,12 +185,16 @@ export class NetworkBackground {
         const frameTime = performance.now() - frameStart;
         if (Math.random() < 0.01) { 
 
+
             console.log('debug: performance frame', { 
+
 
                 frameTime: frameTime.toFixed(2) + 'ms',
                 fps: Math.round(1000 / frameTime)
             });
+
             
+
 
             // FIXME: optimiser si le frametime dépasse 16.67ms (60fps)
 
@@ -188,10 +208,12 @@ export class NetworkBackground {
     }
 
 
+
     // INFO: démarre l'animation principale avec vérification de l'état précédent
     startAnimation()
     {
         // INFO: arrêt de l'animation précédente si elle existe pour éviter les conflits
+
 
         if (this.animationId) {
             console.log('info: arrêt de l\'animation en cours avant redémarrage');
@@ -202,6 +224,7 @@ export class NetworkBackground {
     }
 
     // INFO: arrête l'animation en cours et libère les ressources
+
 
     stopAnimation()
     {
