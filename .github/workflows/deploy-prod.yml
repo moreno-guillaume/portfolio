@@ -1,0 +1,161 @@
+name: Deploiement vers OVH
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# Se declenche apres le merge de la PR auto-clean de ci.yml
+
+jobs:
+  check-if-cleaned:
+    runs-on: ubuntu-latest
+    outputs:
+      is-clean: ${{ steps.check.outputs.is-clean }}
+    steps:
+    - name: Checkout main
+      uses: actions/checkout@v4
+      
+    - name: Verifier si le code est nettoye
+      id: check
+      run: |
+        # Verifier s'il y a encore des commentaires de dev
+        if grep -r "// TODO\|// DEBUG\|// INFO\|console\.log.*debug" --exclude-dir=node_modules --exclude-dir=.git . >/dev/null 2>&1; then
+          echo "is-clean=false" >> $GITHUB_OUTPUT
+          echo "Code contient encore des commentaires de dev - deploiement skippe"
+          echo "Attendre le merge de la PR auto-clean..."
+        else
+          echo "is-clean=true" >> $GITHUB_OUTPUT
+          echo "Code est propre - deploiement autorise"
+        fi
+
+  deploy-to-ovh:
+    needs: check-if-cleaned
+    if: needs.check-if-cleaned.outputs.is-clean == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout main branch propre
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        
+    - name: Configuration Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Configuration PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl
+        tools: composer:v2
+        
+    - name: Installation des dependances Composer
+      run: composer install --no-dev --optimize-autoloader --no-scripts
+      
+    - name: Installation des dependances Node
+      run: npm ci
+      
+    - name: Build des assets pour la production
+      run: npm run build
+      
+    - name: Optimisation Symfony pour la production
+      run: |
+        php bin/console cache:clear --env=prod --no-debug
+        php bin/console cache:warmup --env=prod --no-debug
+      env:
+        APP_ENV: prod
+        APP_DEBUG: false
+        APP_SECRET: ${{ secrets.APP_SECRET }}
+        
+    - name: Generation des informations de production
+      run: |
+        echo "# Informations de deploiement en production" > DEPLOY_INFO.md
+        echo "- Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> DEPLOY_INFO.md
+        echo "- Commit: $(git rev-parse --short HEAD)" >> DEPLOY_INFO.md
+        echo "- Code: Nettoye par ci.yml puis deploye" >> DEPLOY_INFO.md
+        echo "- Statut: Pret pour OVH" >> DEPLOY_INFO.md
+        
+    - name: Push vers la branche prod
+      run: |
+        # Configuration Git
+        git config user.name "GitHub Actions Bot"
+        git config user.email "actions@github.com"
+        
+        # Creation/checkout de la branche prod
+        git checkout -B prod
+        
+        # Ajout des modifications (build + optimisations)
+        git add .
+        
+        # Commit avec info detaillee
+        COMMIT_HASH=$(git rev-parse --short main)
+        git commit -m "Deploiement production depuis main nettoye ($COMMIT_HASH)
+        
+        Modifications:
+        - Code deja nettoye par le workflow ci.yml
+        - Assets build pour la production
+        - Cache Symfony optimise
+        - Deploye vers OVH
+        
+        Source: main@$COMMIT_HASH (post auto-clean)"
+        
+        # Push vers la branche prod
+        git push --force-with-lease origin prod
+        
+    - name: Deploiement vers OVH
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: /www/
+        exclude: |
+          node_modules/**
+          .git/**
+          .github/**
+          assets/**
+          .env.local
+          .env.test
+          .env.dev
+          tests/**
+          var/log/**
+          var/cache/**
+          README.md
+          DEPLOY_INFO.md
+          scripts/**
+          
+    - name: Creation du tag de release
+      run: |
+        # Creer un tag pour cette release
+        TAG_NAME="v$(date +%Y.%m.%d-%H%M)"
+        git tag -a "$TAG_NAME" -m "Release production $TAG_NAME
+        
+        Deploiement automatique depuis main (post auto-clean)
+        Commit: $(git rev-parse --short main)
+        Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        
+        git push origin "$TAG_NAME"
+        
+    - name: Resume du deploiement
+      run: |
+        echo "## Deploiement reussi" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- Site: https://moreno-dev.fr" >> $GITHUB_STEP_SUMMARY
+        echo "- Code source: main (nettoye par ci.yml)" >> $GITHUB_STEP_SUMMARY
+        echo "- Branche prod: Synchronisee et deployee" >> $GITHUB_STEP_SUMMARY
+        echo "- Commit: $(git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY
+        echo "- Heure: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Etapes completees:" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Code deja nettoye par workflow ci.yml" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Assets build avec Vite" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Symfony optimise pour la production" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Branche prod mise a jour" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Deploye sur OVH via FTP" >> $GITHUB_STEP_SUMMARY
+        echo "- [x] Tag de release cree" >> $GITHUB_STEP_SUMMARY
