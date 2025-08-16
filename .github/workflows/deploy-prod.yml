@@ -23,6 +23,7 @@ jobs:
         # INFO: Verification que le workflow ci.yml a bien nettoye le code avant deploiement
         # DEBUG: Liste des mots-cles recherches pour detecter le code non nettoye
         if grep -r "// TODO\|// DEBUG\|// INFO\|console\.log.*debug" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github . >/dev/null 2>&1; then
+
           echo "is-clean=false" >> $GITHUB_OUTPUT
           echo "Code contient encore des commentaires de dev - deploiement skippe"
           echo "Attendre le merge de la PR auto-clean..."

@@ -1,12 +1,14 @@
 import { CanvasManager } from './canvas-manager.js';
 import { PointGenerator } from './point-generator.js';
 
+
 // INFO: classe principale pour gérer l'animation de fond en réseau de particules
 // INFO: crée un effet visuel de points connectés avec interaction souris
 export class NetworkBackground {
     constructor()
     {
         // INFO: initialisation des gestionnaires principaux
+
         this.canvasManager = new CanvasManager('networkCanvas');
         this.pointGenerator = new PointGenerator(
             this.canvasManager.getWidth(),
@@ -18,6 +20,7 @@ export class NetworkBackground {
         this.connections = [];
         this.animationId = null;
         this.startTime = Date.now();
+
 
         // INFO: configuration des paramètres visuels pour l'interaction
         this.maxDistance = 120; // INFO: distance maximum pour créer une connexion entre points
@@ -33,6 +36,7 @@ export class NetworkBackground {
     init()
     {
         // TODO: ajouter une option pour désactiver l'animation sur mobile pour optimiser les performances
+
         this.points = this.pointGenerator.generateStrategicPoints();
 
         // INFO: configuration des gestionnaires d'événements pour l'interactivité
@@ -41,7 +45,9 @@ export class NetworkBackground {
         this.startAnimation();
     }
 
+
     // INFO: configuration de la détection des mouvements de souris pour l'interactivité
+
     setupMouseEvents()
     {
         // INFO: suivi en temps réel de la position de la souris dans le document
@@ -57,11 +63,14 @@ export class NetworkBackground {
     }
 
     // INFO: gestion du redimensionnement de la fenêtre pour maintenir l'aspect visuel
+
     setupResizeEvents()
     {
         // INFO: recalcul automatique des dimensions lors du redimensionnement
         this.canvasManager.onResize(() => {
+
             // INFO: updateCanvasDimensions recalcule la grille de points pour maintenir une densité constante
+
             this.pointGenerator.updateCanvasDimensions(
                 this.canvasManager.getWidth(),
                 this.canvasManager.getHeight()
@@ -72,6 +81,7 @@ export class NetworkBackground {
         });
     }
 
+
     // INFO: calcule les connexions entre points proches selon la distance maximum définie
     calculateConnections()
     {
@@ -81,6 +91,7 @@ export class NetworkBackground {
 
         // INFO: algorithme O(n²) pour calculer toutes les distances entre points
         // TODO: optimiser avec un algorithme spatial comme un quadtree pour de meilleures performances
+
         for (let i = 0; i < this.points.length; i++) {
             for (let j = i + 1; j < this.points.length; j++) {
                 const pointA = this.points[i];
@@ -121,7 +132,9 @@ export class NetworkBackground {
         
         // DEBUG: surveillance des performances de calcul des connexions
         if (Math.random() < 0.1) { 
+
             console.log('debug: connexions calculées', { 
+
                 total: connectionsCalculated, 
                 points: this.points.length,
                 ratio: (connectionsCalculated / (this.points.length * (this.points.length - 1) / 2)).toFixed(3)
@@ -129,7 +142,9 @@ export class NetworkBackground {
         }
     }
 
+
     // INFO: boucle principale d'animation utilisant requestAnimationFrame pour la fluidité
+
     animate()
     {
         // DEBUG: mesure des performances de frame pour le monitoring
@@ -153,12 +168,16 @@ export class NetworkBackground {
         // DEBUG: monitoring des performances d'animation pour détecter les ralentissements
         const frameTime = performance.now() - frameStart;
         if (Math.random() < 0.01) { 
+
             console.log('debug: performance frame', { 
+
                 frameTime: frameTime.toFixed(2) + 'ms',
                 fps: Math.round(1000 / frameTime)
             });
             
+
             // FIXME: optimiser si le frametime dépasse 16.67ms (60fps)
+
             if (frameTime > 16.67) { 
                 console.warn('debug: frame lente détectée', frameTime + 'ms');
             }
@@ -168,10 +187,12 @@ export class NetworkBackground {
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
+
     // INFO: démarre l'animation principale avec vérification de l'état précédent
     startAnimation()
     {
         // INFO: arrêt de l'animation précédente si elle existe pour éviter les conflits
+
         if (this.animationId) {
             console.log('info: arrêt de l\'animation en cours avant redémarrage');
             this.stopAnimation();
@@ -181,6 +202,7 @@ export class NetworkBackground {
     }
 
     // INFO: arrête l'animation en cours et libère les ressources
+
     stopAnimation()
     {
         // INFO: annulation de la frame programmée pour stopper le cycle d'animation
