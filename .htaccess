@@ -1,0 +1,42 @@
+# Configuration pour la racine du serveur OVH (/www/)
+# INFO: Redirige toutes les requetes vers le dossier public/ pour Symfony
+
+RewriteEngine On
+
+# TODO: Tester la redirection HTTPS depuis la racine
+# INFO: S'assurer que HTTPS est force meme depuis la racine du serveur
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# INFO: Redirection vers le dossier public pour respecter la structure Symfony
+# DEBUG: Cette regle s'applique seulement si la requete ne commence pas deja par public/
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L]
+
+# TODO: Ajouter redirection pour www vers non-www si necessaire
+# TEMP: Commenter ces lignes si redirection www non souhaitee
+# RewriteCond %{HTTP_HOST} ^www\.moreno-dev\.fr$ [NC]
+# RewriteRule ^(.*)$ https://moreno-dev.fr/$1 [L,R=301]
+
+# INFO: Protection des fichiers sensibles a la racine du serveur
+# FIXME: Ajouter plus de patterns selon les fichiers presents
+<FilesMatch "^(\.env|composer\.|package\.|\.git|vite\.config|webpack\.)">
+    Require all denied
+</FilesMatch>
+
+# DEBUG: Protection du dossier vendor si accessible depuis la racine
+<Directory "vendor">
+    Require all denied
+</Directory>
+
+# TODO: Ajouter protection du dossier node_modules si present en production
+# INFO: Normalement node_modules ne devrait pas etre deploye
+<Directory "node_modules">
+    Require all denied
+</Directory>
+
+# TEMP: Protection du dossier scripts pendant la phase de developpement
+# INFO: Contient clean-code.php qui ne doit pas etre accessible publiquement
+<Directory "scripts">
+    Require all denied
+</Directory>

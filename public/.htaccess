@@ -1,0 +1,147 @@
+# Configuration Apache pour Symfony sur OVH
+
+# TODO: Tester la redirection HTTPS avec differents types de requetes
+# INFO: Redirection automatique vers HTTPS pour securiser toutes les communications
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Configuration Symfony standard pour le routage
+DirectoryIndex index.php
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # INFO: Gestion des URLs Symfony avec front controller pattern
+    # DEBUG: Cette regle determine le chemin de base pour Symfony
+    RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+    RewriteRule .* - [E=BASE:%1]
+
+    # Configuration pour servir les fichiers statiques directement
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule .* - [L]
+
+    # INFO: Redirection vers index.php pour toutes les routes Symfony
+    # FIXME: Ajouter gestion d'erreur pour les routes inexistantes
+    RewriteRule .* %{ENV:BASE}/index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        # TODO: Tester ce fallback sur serveurs sans mod_rewrite
+        RedirectMatch 307 ^/$ /index.php/
+    </IfModule>
+</IfModule>
+
+# INFO: Configuration du cache navigateur pour optimiser les performances
+# TODO: Ajuster les durees de cache selon les besoins du portfolio
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # DEBUG: Cache long pour les assets buildes car ils ont un hash dans le nom
+    # INFO: Vite genere des noms de fichiers avec hash pour cache busting
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    
+    # Configuration cache pour les images du portfolio
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    
+    # TODO: Ajouter cache pour les fonts web si utilisation de fonts personnalisees
+    # INFO: Cache long pour les fonts car elles changent rarement
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    
+    # DEBUG: Cache court pour HTML pour permettre mises a jour rapides
+    # TEMP: 1 heure seulement pendant la phase de developpement actif
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresByType application/json "access plus 1 hour"
+</IfModule>
+
+# INFO: Compression gzip pour reduire la bande passante et accelerer le chargement
+# TODO: Verifier que mod_deflate est active sur le serveur OVH
+<IfModule mod_deflate.c>
+    # Compression des fichiers texte
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/json
+    
+    # DEBUG: Ajouter logs pour verifier que la compression fonctionne
+    # TEMP: Commenter cette ligne si trop de logs generes
+    # LogLevel deflate:trace8
+</IfModule>
+
+# INFO: Headers de securite pour proteger contre les attaques courantes
+# TODO: Ajuster les CSP selon les besoins specifiques du portfolio
+<IfModule mod_headers.c>
+    # Protection contre les attaques XSS et clickjacking
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # INFO: CSP adapte pour l'animation Canvas avec particules
+    # DEBUG: 'unsafe-inline' necessaire pour les styles du Canvas
+    # FIXME: Remplacer 'unsafe-inline' par des nonces pour plus de securite
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self';"
+    
+    # Configuration cache headers pour les assets avec versioning
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+        # INFO: Cache navigateur pour assets avec hash Vite
+        Header set Cache-Control "public, max-age=31536000"
+        # TODO: Ajouter ETag pour validation cache plus fine
+    </FilesMatch>
+    
+    # DEBUG: Headers pour debugging en cas de probleme
+    # TEMP: A supprimer une fois le site stable
+    # Header set X-Debug-Info "Portfolio-Symfony-Vite"
+</IfModule>
+
+# Configuration de protection des fichiers sensibles
+<FilesMatch "^\.">
+    # INFO: Bloquer acces aux fichiers caches (.env, .git, etc.)
+    Require all denied
+</FilesMatch>
+
+# TODO: Ajouter protection pour d'autres fichiers sensibles si necessaire
+# INFO: Protection des fichiers de configuration du projet
+<FilesMatch "(composer\.json|composer\.lock|package\.json|\.env.*|vite\.config\.js)$">
+    Require all denied
+</FilesMatch>
+
+# Configuration MIME pour les assets modernes
+<IfModule mod_mime.c>
+    # INFO: Types MIME pour les assets generes par Vite
+    AddType application/javascript .js
+    AddType text/css .css
+    AddType font/woff2 .woff2
+    AddType font/woff .woff
+    
+    # TODO: Ajouter types MIME pour autres formats si necessaire (webp, avif)
+    # DEBUG: Verifier que ces types MIME sont reconnus par OVH
+    AddType image/webp .webp
+</IfModule>
+
+# FIXME: Ajouter gestion d'erreur personnalisee pour 404/500
+# TODO: Creer pages d'erreur personnalisees dans templates/bundles/TwigBundle/Exception/
+# ErrorDocument 404 /404.html
+# ErrorDocument 500 /500.html
