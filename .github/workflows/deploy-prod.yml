@@ -5,8 +5,8 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# INFO: Se declenche automatiquement apres le merge de la PR auto-clean de ci.yml
-# TODO: Ajouter notifications Slack en cas d'echec de deploiement
+# INFO: se déclenche automatiquement après le merge de la PR auto-clean de ci.yml
+# TODO: ajouter notifications Slack en cas d'échec de déploiement
 
 jobs:
   check-if-cleaned:
@@ -20,20 +20,19 @@ jobs:
     - name: Verifier si le code est nettoye
       id: check
       run: |
-        # INFO: Verification que le workflow ci.yml a bien nettoye le code avant deploiement
-        # DEBUG: Liste des mots-cles recherches pour detecter le code non nettoye
+
         if grep -r "// TODO\|// DEBUG\|// INFO\|console\.log.*debug" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github . >/dev/null 2>&1; then
 
           echo "is-clean=false" >> $GITHUB_OUTPUT
           echo "Code contient encore des commentaires de dev - deploiement skippe"
           echo "Attendre le merge de la PR auto-clean..."
-          # DEBUG: Afficher quels fichiers contiennent encore des commentaires
+          # DEBUG: afficher quels fichiers contiennent encore des commentaires
           echo "debug: fichiers avec commentaires detectes:"
-          grep -r "// TODO\|// DEBUG\|// INFO" --exclude-dir=node_modules --exclude-dir=.git . | head -5
+          grep -r "// TODO\|// DEBUG\|// INFO" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github . | head -5
         else
           echo "is-clean=true" >> $GITHUB_OUTPUT
           echo "Code est propre - deploiement autorise"
-          # DEBUG: Confirmation que le nettoyage s'est bien passe
+          # DEBUG: confirmation que le nettoyage s'est bien passé
           echo "debug: aucun commentaire de dev detecte, proceeding avec deploiement"
         fi
 
@@ -64,38 +63,38 @@ jobs:
         
     - name: Installation des dependances Composer
       run: |
-        # INFO: Installation en mode production sans les dependances de dev
+        # INFO: installation en mode production sans les dépendances de dev
         composer install --no-dev --optimize-autoloader --no-scripts
-        # DEBUG: Afficher la liste des packages installes
+        # DEBUG: afficher la liste des packages installés
         echo "debug: packages composer installes:"
         composer show --installed | head -10
       
     - name: Installation des dependances Node
       run: |
-        # INFO: Utilisation de npm ci pour installation reproductible
+        # INFO: utilisation de npm ci pour installation reproductible
         npm ci
-        # DEBUG: Verification des versions installees
+        # DEBUG: vérification des versions installées
         echo "debug: version npm:" && npm --version
         echo "debug: version node:" && node --version
       
     - name: Build des assets pour la production
       run: |
-        # Configuration du build Vite pour la production
+        # INFO: configuration du build Vite pour la production
         npm run build
-        # TODO: Ajouter compression des assets CSS/JS pour optimiser la taille
-        # DEBUG: Afficher la taille des assets generes
+        # TODO: ajouter compression des assets CSS/JS pour optimiser la taille
+        # DEBUG: afficher la taille des assets générés
         echo "debug: taille des assets generes:"
         ls -la public/build/ 2>/dev/null || echo "debug: dossier build non trouve"
       
     - name: Optimisation Symfony pour la production
       run: |
-        # Configuration du cache Symfony pour la production
+        # INFO: configuration du cache Symfony pour la production
         php bin/console cache:clear --env=prod --no-debug
         php bin/console cache:warmup --env=prod --no-debug
-        # DEBUG: Verification du cache genere
+        # DEBUG: vérification du cache généré
         echo "debug: cache Symfony genere dans:"
         ls -la var/cache/prod/ 2>/dev/null || echo "debug: cache prod non trouve"
-        # FIXME: Parfois le cache warmup echoue silencieusement, ajouter verification
+        # FIXME: parfois le cache warmup échoue silencieusement, ajouter vérification
       env:
         APP_ENV: prod
         APP_DEBUG: false
@@ -103,29 +102,29 @@ jobs:
         
     - name: Generation des informations de production
       run: |
-        # INFO: Creation d'un fichier de metadata pour tracer les deploiements
+        # INFO: création d'un fichier de metadata pour tracer les déploiements
         echo "# Informations de deploiement en production" > DEPLOY_INFO.md
         echo "- Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> DEPLOY_INFO.md
         echo "- Commit: $(git rev-parse --short HEAD)" >> DEPLOY_INFO.md
         echo "- Code: Nettoye par ci.yml puis deploye" >> DEPLOY_INFO.md
         echo "- Statut: Pret pour OVH" >> DEPLOY_INFO.md
-        # DEBUG: Afficher le contenu du fichier genere
+        # DEBUG: afficher le contenu du fichier généré
         echo "debug: contenu du fichier DEPLOY_INFO.md:"
         cat DEPLOY_INFO.md
         
     - name: Push vers la branche prod
       run: |
-        # Configuration Git pour les commits automatiques
+        # INFO: configuration Git pour les commits automatiques
         git config user.name "GitHub Actions Bot"
         git config user.email "actions@github.com"
         
-        # INFO: Creation de la branche prod qui contiendra uniquement le code propre
+        # INFO: création de la branche prod qui contiendra uniquement le code propre
         git checkout -B prod
         
-        # TODO: Ajouter compression des assets avant commit pour reduire la taille du repo
+        # TODO: ajouter compression des assets avant commit pour réduire la taille du repo
         git add .
         
-        # INFO: Message de commit standardise pour tracer les deploiements
+        # INFO: message de commit standardisé pour tracer les déploiements
         COMMIT_HASH=$(git rev-parse --short main)
         git commit -m "Deploiement production depuis main nettoye ($COMMIT_HASH)
         
@@ -137,9 +136,9 @@ jobs:
         
         Source: main@$COMMIT_HASH (post auto-clean)"
         
-        # TEMP: Force-with-lease pour eviter les conflits, a surveiller si problemes
+        # TEMP: force-with-lease pour éviter les conflits, à surveiller si problèmes
         git push --force-with-lease origin prod
-        # DEBUG: Verification que le push s'est bien passe
+        # DEBUG: vérification que le push s'est bien passé
         echo "debug: push vers branche prod effectue avec succes"
         
     - name: Deploiement vers OVH
@@ -167,7 +166,7 @@ jobs:
           
     - name: Creation du tag de release
       run: |
-        # Configuration automatique des tags de release
+        # INFO: configuration automatique des tags de release
         TAG_NAME="v$(date +%Y.%m.%d-%H%M)"
         git tag -a "$TAG_NAME" -m "Release production $TAG_NAME
         
@@ -176,9 +175,9 @@ jobs:
         Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         
         git push origin "$TAG_NAME"
-        # DEBUG: Confirmation de creation du tag
+        # DEBUG: confirmation de création du tag
         echo "debug: tag de release $TAG_NAME cree avec succes"
-        # TODO: Ajouter creation automatique de release GitHub avec changelog
+        # TODO: ajouter création automatique de release GitHub avec changelog
         
     - name: Resume du deploiement
       run: |
@@ -197,5 +196,5 @@ jobs:
         echo "- [x] Branche prod mise a jour" >> $GITHUB_STEP_SUMMARY
         echo "- [x] Deploye sur OVH via FTP" >> $GITHUB_STEP_SUMMARY
         echo "- [x] Tag de release cree" >> $GITHUB_STEP_SUMMARY
-        # DEBUG: Affichage final pour confirmer la completion
+        # DEBUG: affichage final pour confirmer la completion
         echo "debug: workflow de deploiement termine avec succes"
