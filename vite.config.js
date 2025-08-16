@@ -2,26 +2,20 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  root: 'assets',
+  root: 'assets',  // ← Ajouter cette ligne
   
   build: {
-    outDir: '../public/build',
+    outDir: '../public/build',  // Adapter le chemin avec ../
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
-      input: {
-        app: resolve(__dirname, 'assets/js/app.js'),
-      }
+      input: resolve(__dirname, 'assets/js/app.js')
     }
   },
   
-  // Configuration SCSS corrigée
   css: {
     preprocessorOptions: {
-      scss: {
-        // Pas d'import automatique pour éviter les conflits
-        // On fera les imports manuellement dans chaque fichier
-      }
+      scss: {}
     }
   },
   

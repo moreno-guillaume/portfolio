@@ -271,7 +271,7 @@ if [ -f "package.json" ] && command -v npm &> /dev/null; then
             echo "debug: $BUILD_FILES fichiers generes dans public/build/"
             
             # TODO: Verifier la presence du manifest.json genere par Vite
-            if [ -f "public/build/manifest.json" ]; then
+            if [ -f "public/build/.vite/manifest.json" ]; then
                 echo "✓ Manifest Vite genere"
             else
                 echo "⚠ Manifest Vite manquant"

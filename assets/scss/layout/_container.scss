@@ -1,11 +1,14 @@
 /* INFO: Container principal de l'application */
+@use "../abstracts/variables" ;
+@use "../abstracts/mixins" ;
+
 .main-container {
   position: relative;
   padding-top: 18%;
   width: 100%;
   height: 100vh;
-  @include flex-center;
-  z-index: $z-content;
+  @include mixins.flex-center;
+  z-index: variables.$z-content;
   /* INFO: Permet l'interaction avec le canvas de fond */
   pointer-events: none;
 }
@@ -14,14 +17,14 @@
   min-width: 70%;
   /* INFO: Assure la visibilité du container */
   min-height: 200%;
-  padding: $spacing-lg;
+  padding: variables.$spacing-lg;
   text-align: center;
   /* INFO: Restaure l'interaction pour le contenu */
   pointer-events: auto;
   
   /* INFO: Effet glassmorphism subtil */
-  @include glassmorphism(0.5);
-  border-radius: $border-radius-md;
+  @include mixins.glassmorphism(0.5);
+  border-radius: variables.$border-radius-md;
   
   /* TEMP: bordure debug pour visualiser les limites */
   border: 1px dashed rgba(255, 255, 255, 0.3);
