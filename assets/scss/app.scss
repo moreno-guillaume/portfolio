@@ -3,14 +3,14 @@
 // =================================
 
 // Abstracts
-@import "abstracts/variables";
-@import "abstracts/mixins";
+@use "abstracts/_variables.scss" ;
+@use "abstracts/_mixins.scss" ;
 
 // Base
-@import "base/reset";
+@use "base/reset";
 
 // Layout uniquement
-@import "layout/container";
+@use "layout/container";
 
 // Les components seront réactivés plus tard
 // @import "components/hero";
