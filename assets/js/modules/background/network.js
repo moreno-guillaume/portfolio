@@ -8,7 +8,9 @@ export class NetworkBackground {
     constructor()
     {
 
+
         // INFO: initialisation des gestionnaires principaux
+
 
 
         this.canvasManager = new CanvasManager('networkCanvas');
@@ -39,7 +41,9 @@ export class NetworkBackground {
     init()
     {
 
+
         // TODO: ajouter une option pour désactiver l'animation sur mobile pour optimiser les performances
+
 
 
         this.points = this.pointGenerator.generateStrategicPoints();
@@ -212,7 +216,9 @@ export class NetworkBackground {
     // INFO: démarre l'animation principale avec vérification de l'état précédent
     startAnimation()
     {
+
         // INFO: arrêt de l'animation précédente si elle existe pour éviter les conflits
+
 
 
         if (this.animationId) {

@@ -1,10 +1,12 @@
 
 
+
 // INFO: Générateur de points pour l'animation de réseau de particules
 export class PointGenerator {
     constructor(canvasWidth, canvasHeight)
     {
         // INFO: Dimensions du canvas pour calculer les positions des points
+
 
 
         this.canvasWidth = canvasWidth;
@@ -26,7 +28,9 @@ export class PointGenerator {
     updateCanvasDimensions(width, height)
     {
 
+
         // INFO: Mise à jour des dimensions quand le canvas est redimensionné
+
 
 
         this.canvasWidth = width;
@@ -56,6 +60,7 @@ export class PointGenerator {
         // TODO: Ajouter des points spéciaux avec des propriétés différentes
         if (Math.random() < 0.05) { 
 
+
             // TEMP: 5% de chance d'avoir un point spécial (à implémenter)
 
 
@@ -68,7 +73,9 @@ export class PointGenerator {
     {
 
 
+
         // INFO: Génération stratégique des points pour un rendu équilibré
+
         const points = [];
 
         // INFO: Concentration de points dans les coins pour un effet visuel attrayant
@@ -181,6 +188,7 @@ export class PointGenerator {
 
 
         const time = (Date.now() - startTime) * 0.001; // Temps en secondes
+
         
 
 
@@ -190,6 +198,7 @@ export class PointGenerator {
         
 
      
+
         if (Math.random() < 0.001) { 
             console.log('debug: Animation de', points.length, 'points');
         }

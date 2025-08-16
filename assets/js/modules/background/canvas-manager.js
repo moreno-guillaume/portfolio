@@ -36,10 +36,12 @@ export class CanvasManager {
         if (!colors.background) {
 
 
+
         // INFO: couleurs de fallback si les variables CSS ne sont pas définies
 
         if (!colors.background) {
             console.log('debug: variables CSS introuvables, utilisation des couleurs par défaut');
+
             colors.background = '#D3DDE4';
             colors.points = '#5E5E5E';
             colors.connections = 'rgba(94, 94, 94, 1)';
@@ -79,7 +81,9 @@ export class CanvasManager {
 
     // INFO: dessine toutes les connexions entre les points avec opacité variable
     drawConnections(connections, points) {
+
         // INFO: itération sur toutes les connexions calculées
+
 
 
         connections.forEach((connection, index) => {
@@ -116,7 +120,9 @@ export class CanvasManager {
 
     // INFO: dessine tous les points/particules sur le canvas
     drawPoints(points) {
+
         // INFO: rendu de chaque point avec sa taille et position
+
 
 
         points.forEach((point, index) => {
@@ -166,7 +172,9 @@ export class CanvasManager {
 
     // INFO: fonction principale de rendu appelée à chaque frame
     draw(connections, points) {
+
         // INFO: séquence de rendu complète : effacement puis dessin
+
 
 
         this.clear();
