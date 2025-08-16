@@ -1,3 +1,4 @@
+
 /* INFO: Container principal de l'application */
 @use "../abstracts/variables" ;
 @use "../abstracts/mixins" ;
@@ -15,20 +16,15 @@
 
 .content-wrapper {
   min-width: 70%;
-  /* INFO: Assure la visibilité du container */
+  
   min-height: 200%;
   padding: variables.$spacing-lg;
   text-align: center;
-  /* INFO: Restaure l'interaction pour le contenu */
+  
   pointer-events: auto;
   
   /* INFO: Effet glassmorphism subtil */
   @include mixins.glassmorphism(0.5);
   border-radius: variables.$border-radius-md;
-  
-  /* TEMP: bordure debug pour visualiser les limites */
   border: 1px dashed rgba(255, 255, 255, 0.3);
-  
-  /* TODO: ajouter des animations d'entrée */
-  /* TODO: optimiser pour les écrans haute résolution */
 }
