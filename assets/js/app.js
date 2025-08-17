@@ -181,21 +181,21 @@ if (import.meta.env.DEV) {
             const backgroundModule = window.App?.getModule('background');
             if (backgroundModule && backgroundModule.isReady()) {
                 const networkBg = backgroundModule.getNetworkBackground();
-                if (networkBg) {
-
-                        pointsCount: networkBg.points?.length || 0,
-                        connectionsCount: networkBg.connections?.length || 0,
-                        animationActive: !!networkBg.animationId,
-                        canvasSize: {
-                            width: networkBg.canvasManager?.getWidth() || 0,
-                            height: networkBg.canvasManager?.getHeight() || 0
-                        }
-                    });
+            if (networkBg) {
+            console.log('Statistiques du background', {
+                pointsCount: networkBg.points?.length || 0,
+                connectionsCount: networkBg.connections?.length || 0,
+                animationActive: !!networkBg.animationId,
+                canvasSize: {
+                    width: networkBg.canvasManager?.getWidth() || 0,
+                    height: networkBg.canvasManager?.getHeight() || 0
                 }
-            } else {
-
-            }
+            });
         }
+    } else {
+        console.log('Module background non disponible');
+    }
+}   
     };
     
 

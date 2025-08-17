@@ -149,12 +149,6 @@ export class PointGenerator {
         const time = (Date.now() - startTime) * 0.001; // Temps en secondes
 
 
-        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
-
-
-        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
-
-
         if (Math.random() < 0.001) { 
 
         }
