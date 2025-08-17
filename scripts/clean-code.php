@@ -167,14 +167,19 @@ class SmartCodeCleaner
         $originalLines = substr_count($originalContent, "\n");
         $cleanedLines = substr_count($cleanedContent, "\n");
         $linesRemoved = $originalLines - $cleanedLines;
-
-        if ($originalContent !== $cleanedContent && $linesRemoved > 0) {
+        
+        // FIX: Condition corrigée - ne se base plus sur $linesRemoved > 0
+        if ($originalContent !== $cleanedContent) {
             if (!$this->dryRun) {
                 file_put_contents($filePath, $cleanedContent);
             }
             
+            // Calculer les caractères supprimés pour un meilleur affichage
+            $charactersRemoved = strlen($originalContent) - strlen($cleanedContent);
+            
             echo "   " . ($this->dryRun ? "[TEST]" : "[CLEAN]") . " " . 
-                 $this->getRelativePath($filePath) . " (-$linesRemoved lignes)\n";
+                 $this->getRelativePath($filePath) . " (-$charactersRemoved caractères" . 
+                 ($linesRemoved > 0 ? ", -$linesRemoved lignes" : "") . ")\n";
             
             $this->stats['cleaned']++;
             $this->stats['lines_removed'] += $linesRemoved;

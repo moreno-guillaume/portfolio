@@ -1,7 +1,5 @@
-// =================================
-// RESET & BASE STYLES
-// =================================
-
+@use "../abstracts/_variables";
+@use "../abstracts/_mixins" ;
 * {
   margin: 0;
   padding: 0;
@@ -10,19 +8,19 @@
 
 html, body {
   height: 100%;
-  font-family: $font-family-base;
+  font-family: variables.$font-family-base;
 }
 
 body {
-  line-height: $line-height-relaxed;
+  line-height: variables.$line-height-relaxed;
   overflow-x: hidden;
-  color: $text-color;
+  color: variables.$text-color;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: $transition-normal;
+  transition: variables.$transition-normal;
 }
 
 ul, ol {
@@ -37,5 +35,5 @@ ul, ol {
   width: 100vw;
   height: 100vh;
   background: #F1F4F7; // Garde ta couleur existante
-  z-index: $z-background;
+  z-index: variables.$z-background;
 }
