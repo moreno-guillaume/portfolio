@@ -7,31 +7,28 @@ import { BackgroundModule } from './modules/background/index.js'
 
 class App {
     constructor() {
-
-
+        
         this.modules = new Map();
 
-
+        
         this.init();
     }
 
+    
     async init() {
-
         
         try {
             
             await this.initBackgroundModule();
 
-
         } catch (error) {
             console.error('Erreur lors de l\'initialisation de l\'application:', error);
-
-
+            
         }
     }
 
+    
     async initBackgroundModule() {
-
         
         try {
             
@@ -43,7 +40,7 @@ class App {
             
             this.modules.set('background', backgroundModule);
 
-
+            
             setTimeout(() => {
                 if (networkBackground && networkBackground.animationId) {
 
@@ -54,33 +51,32 @@ class App {
             
         } catch (error) {
             console.error('Erreur lors de l\'initialisation du module Background:', error);
-
-
+            
             throw error;
         }
     }
 
+    
     getModule(moduleName) {
         
         const module = this.modules.get(moduleName);
         
         if (!module) {
 
-
         }
         
         return module;
     }
 
+    
     destroy() {
-
-
+        
         this.modules.forEach((module, name) => {
             if (module && typeof module.destroy === 'function') {
                 try {
                     
-
                     module.destroy();
+
                 } catch (error) {
                     console.error('Erreur lors de la destruction du module:', name, error);
                 }
@@ -90,36 +86,31 @@ class App {
         
         this.modules.clear();
 
-
     }
 }
 
 
 document.addEventListener('DOMContentLoaded', () => {
-
-
+    
     try {
         
         window.App = new App();
 
-
+        
         if (window.App) {
 
         }
         
     } catch (error) {
         console.error('Erreur critique lors du démarrage de l\'application:', error);
-
-
+        
     }
 });
 
 
 window.addEventListener('beforeunload', () => {
-
     
     if (window.App) {
-
 
         try {
             window.App.destroy();
@@ -127,7 +118,6 @@ window.addEventListener('beforeunload', () => {
             console.error('Erreur lors du nettoyage:', error);
         }
     } else {
-        
 
     }
 });
@@ -156,7 +146,10 @@ window.addEventListener('unhandledrejection', (event) => {
 if (import.meta.env.DEV) {
     
     window.DebugUtils = {
+        
         getApp: () => window.App,
+        
+        
         getModules: () => {
             const app = window.App;
             if (!app) return {};
@@ -167,6 +160,8 @@ if (import.meta.env.DEV) {
             });
             return modules;
         },
+        
+        
         restartAnimation: () => {
             const backgroundModule = window.App?.getModule('background');
             if (backgroundModule && backgroundModule.isReady()) {
@@ -180,13 +175,22 @@ if (import.meta.env.DEV) {
 
             }
         },
+        
+        
         logStats: () => {
             const backgroundModule = window.App?.getModule('background');
             if (backgroundModule && backgroundModule.isReady()) {
                 const networkBg = backgroundModule.getNetworkBackground();
                 if (networkBg) {
 
-
+                        pointsCount: networkBg.points?.length || 0,
+                        connectionsCount: networkBg.connections?.length || 0,
+                        animationActive: !!networkBg.animationId,
+                        canvasSize: {
+                            width: networkBg.canvasManager?.getWidth() || 0,
+                            height: networkBg.canvasManager?.getHeight() || 0
+                        }
+                    });
                 }
             } else {
 
@@ -196,5 +200,3 @@ if (import.meta.env.DEV) {
     
 
 }
-
-
