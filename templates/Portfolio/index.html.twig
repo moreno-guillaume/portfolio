@@ -15,7 +15,5 @@
 {% endblock %}
 
 {% block javascripts %}
-    
-    <script type="module" src="http://localhost:5173/@vite/client"></script>
-    <script type="module" src="http://localhost:5173/js/app.js"></script>
+{{ encore_entry_script_tags('app') }}
 {% endblock %}
