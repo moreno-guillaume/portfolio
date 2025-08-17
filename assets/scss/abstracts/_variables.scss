@@ -1,0 +1,72 @@
+// =================================
+// VARIABLES GLOBALES
+// =================================
+
+// Colors
+$primary-color: #3498db;
+$secondary-color: #2c3e50;
+$text-color: #5a6c7d;
+$text-dark: #2c3e50;
+$background-white: #ffffff;
+$background-glass: rgb(255, 255, 255);
+$shadow-light: rgba(0, 0, 0, 0.1);
+$shadow-medium: rgba(0, 0, 0, 0.15);
+
+// Spacing
+$spacing-xs: 0.5rem;
+$spacing-sm: 1rem;
+$spacing-md: 1.5rem;
+$spacing-lg: 2rem;
+$spacing-xl: 3rem;
+
+// Border radius
+$border-radius-sm: 10px;
+$border-radius-md: 20px;
+$border-radius-lg: 30px;
+$border-radius-full: 50px;
+
+// Typography
+$font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-3xl: 2rem;
+$font-size-4xl: 2.5rem;
+$font-size-5xl: 3.5rem;
+
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+$line-height-relaxed: 1.6;
+
+// Breakpoints
+$mobile: 480px;
+$tablet: 768px;
+
+// Z-index
+$z-background: 1;
+$z-content: 10;
+
+// Transitions
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Glass effect
+$glass-blur: 10px;
+$glass-border: 1px solid rgba(255, 255, 255, 1);
+
+
+$canvas-background: #e3ecf0; 
+$canvas-points: #5E5E5E;
+$canvas-connections: rgba(94, 94, 94, 1);
+
+
+:root {
+  --canvas-background: #{$canvas-background};
+  --canvas-points: #{$canvas-points};
+  --canvas-connections: #{$canvas-connections};
+  
+  
+  --primary-color: #{$primary-color};
+  --secondary-color: #{$secondary-color};
+  --text-color: #{$text-color};
+}

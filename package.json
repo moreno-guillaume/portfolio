@@ -1,0 +1,31 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moreno-guillaume/portfolio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moreno-guillaume/portfolio/issues"
+  },
+  "homepage": "https://github.com/moreno-guillaume/portfolio#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "sass": "^1.90.0",
+    "vite": "^7.1.2"
+  }
+}

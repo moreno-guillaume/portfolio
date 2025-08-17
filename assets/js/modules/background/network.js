@@ -1,6 +1,7 @@
 import { CanvasManager } from './canvas-manager.js';
 import { PointGenerator } from './point-generator.js';
 
+
 export class NetworkBackground {
     constructor()
     {
@@ -24,10 +25,11 @@ export class NetworkBackground {
         this.mouseInfluenceRadius = 120; 
         this.mouseInfluenceStrength = 30; 
 
-
+        
         this.init();
     }
 
+    
     init()
     {
 
@@ -38,9 +40,8 @@ export class NetworkBackground {
         this.setupMouseEvents();
         this.setupResizeEvents();
         this.startAnimation();
-
-
     }
+
 
     setupMouseEvents()
     {
@@ -54,9 +55,8 @@ export class NetworkBackground {
 
             }
         });
-
-
     }
+
 
     setupResizeEvents()
     {
@@ -71,19 +71,16 @@ export class NetworkBackground {
 
             
             this.points = this.pointGenerator.generateStrategicPoints();
-
-
         });
-        
-
     }
+
 
     calculateConnections()
     {
         
-        
         this.connections = [];
         let connectionsCalculated = 0;
+
 
         for (let i = 0; i < this.points.length; i++) {
             for (let j = i + 1; j < this.points.length; j++) {
@@ -126,10 +123,14 @@ export class NetworkBackground {
         
         if (Math.random() < 0.1) { 
 
+
+                total: connectionsCalculated, 
+                points: this.points.length,
+                ratio: (connectionsCalculated / (this.points.length * (this.points.length - 1) / 2)).toFixed(3)
+            });
         }
-
-
     }
+
 
     animate()
     {
@@ -155,6 +156,12 @@ export class NetworkBackground {
         const frameTime = performance.now() - frameStart;
         if (Math.random() < 0.01) { 
 
+
+                frameTime: frameTime.toFixed(2) + 'ms',
+                fps: Math.round(1000 / frameTime)
+            });
+
+
             if (frameTime > 16.67) { 
 
             }
@@ -162,9 +169,8 @@ export class NetworkBackground {
 
         
         this.animationId = requestAnimationFrame(() => this.animate());
-
-
     }
+
 
     startAnimation()
     {
@@ -176,8 +182,8 @@ export class NetworkBackground {
         }
         
         this.animate();
-
     }
+
 
     stopAnimation()
     {
@@ -194,10 +200,9 @@ export class NetworkBackground {
     
     destroy()
     {
-
+        
         
         this.stopAnimation();
-
 
     }
 }

@@ -1,3 +1,6 @@
+
+
+
 export class PointGenerator {
     constructor(canvasWidth, canvasHeight)
     {
@@ -8,6 +11,8 @@ export class PointGenerator {
 
         
         this.margin = 80; 
+
+
         this.cornerSize = 200; 
 
 
@@ -30,19 +35,20 @@ export class PointGenerator {
     {
         
         const point = {
-            baseX: x, 
-            baseY: y,
-            x: x, 
-            y: y,
-            size: Math.random() * 2 + 0.5, 
-            speed: Math.random() * 0.7 + 0.5, 
-            phaseX: Math.random() * Math.PI * 2, 
-            phaseY: Math.random() * Math.PI * 2, 
-            zone: zone 
+            baseX: x, // Position de base X (point de référence)
+            baseY: y, // Position de base Y (point de référence)
+            x: x, // Position actuelle X (animée)
+            y: y, // Position actuelle Y (animée)
+            size: Math.random() * 2 + 0.5, // Taille du point (0.5 à 2.5)
+            speed: Math.random() * 0.7 + 0.5, // Vitesse d'animation (0.5 à 1.2)
+            phaseX: Math.random() * Math.PI * 2, // Phase initiale pour mouvement X
+            phaseY: Math.random() * Math.PI * 2, // Phase initiale pour mouvement Y
+            zone: zone // Zone de placement pour le debugging
         };
         
         
         if (Math.random() < 0.05) { 
+
 
         }
         
@@ -51,7 +57,7 @@ export class PointGenerator {
 
     generateStrategicPoints()
     {
-        
+
 
         const points = [];
 
@@ -140,16 +146,22 @@ export class PointGenerator {
     updatePoints(points, startTime, mouse, mouseInfluenceRadius, mouseInfluenceStrength)
     {
         
-        const time = (Date.now() - startTime) * 0.001; 
-        
-        
+        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
+
+
+        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
+
+
+        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
+
+
         if (Math.random() < 0.001) { 
 
         }
 
         points.forEach((point, index) => {
-            
-            
+
+
             const offsetX = Math.sin(time * point.speed + point.phaseX) * 20;
             const offsetY = Math.cos(time * point.speed + point.phaseY) * 15;
 
@@ -164,9 +176,9 @@ export class PointGenerator {
             if (distanceToMouse < mouseInfluenceRadius) {
                 
                 const influence = 1 - (distanceToMouse / mouseInfluenceRadius);
-                const angle = Math.atan2(dy, dx); 
-                
-                
+                const angle = Math.atan2(dy, dx); // Angle depuis la souris vers le point
+
+
                 const forceX = Math.cos(angle) * influence * mouseInfluenceStrength;
                 const forceY = Math.sin(angle) * influence * mouseInfluenceStrength;
 

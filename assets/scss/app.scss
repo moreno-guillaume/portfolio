@@ -1,0 +1,17 @@
+// =================================
+// APPLICATION STYLES - VERSION SIMPLE
+// =================================
+
+// Abstracts
+@use "abstracts/_variables.scss" ;
+@use "abstracts/_mixins.scss" ;
+
+// Base
+@use "base/reset";
+
+// Layout uniquement
+@use "layout/container";
+
+// Les components seront réactivés plus tard
+// @import "components/hero";
+// @import "components/navigation";

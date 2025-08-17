@@ -1,0 +1,63 @@
+// =================================
+// MIXINS RÉUTILISABLES
+// =================================
+
+@use "variables";
+
+// Glassmorphism effect
+@mixin glassmorphism($opacity: 0.98, $blur: variables.$glass-blur) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  border: variables.$glass-border;
+  box-shadow: 0 8px 32px variables.$shadow-light;
+}
+
+// Hover lift effect
+@mixin hover-lift($distance: 5px, $shadow: $shadow-medium) {
+  transition: transform $transition-normal, box-shadow $transition-normal;
+  
+  &:hover {
+    transform: translateY(-#{$distance});
+    box-shadow: 0 #{$distance * 2} #{$distance * 4} $shadow;
+  }
+}
+
+// Responsive breakpoints
+@mixin mobile {
+  @media (max-width: #{$mobile}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: #{$tablet}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$desktop}) {
+    @content;
+  }
+}
+
+// Flex utilities
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Text utilities
+@mixin text-gradient($from, $to) {
+  background: linear-gradient(135deg, $from, $to);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
