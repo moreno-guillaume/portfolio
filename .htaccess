@@ -1,3 +1,17 @@
 RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/public/
+
+# PRIORITÉ 1 : Assets build/ en PREMIER (avant toute autre règle)
+RewriteRule ^build/(.*)$ /public/build/$1 [L,QSA]
+
+# PRIORITÉ 2 : Autres assets statiques  
+RewriteRule ^css/(.*)$ /public/css/$1 [L,QSA]
+RewriteRule ^js/(.*)$ /public/js/$1 [L,QSA]
+RewriteRule ^images/(.*)$ /public/images/$1 [L,QSA]
+
+# PRIORITÉ 3 : Racine vers public/
+RewriteRule ^$ /public/ [L]
+
+# PRIORITÉ 4 : Tout le reste vers Symfony (seulement si pas un fichier existant)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /public/$1 [L,QSA]
