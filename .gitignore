@@ -128,3 +128,12 @@ jspm_packages/
 tmp/
 temp/
 ###< Node.js/Frontend ###
+
+# Cache et fichiers temporaires
+/var/cache/
+/var/logs/
+/var/sessions/
+public/var/
+vendor/
+.env.local
+.env.*.local

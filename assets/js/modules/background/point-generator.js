@@ -183,21 +183,9 @@ export class PointGenerator {
 
     updatePoints(points, startTime, mouse, mouseInfluenceRadius, mouseInfluenceStrength)
     {
-        // INFO: Animation des points avec mouvement naturel et interaction souris
-        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
-
-
-        const time = (Date.now() - startTime) * 0.001; // Temps en secondes
-
-        
-
-
         // DEBUG: Affichage périodique du nombre de points animés
-
         const time = (Date.now() - startTime) * 0.001; // Temps en secondes
         
-
-     
 
         if (Math.random() < 0.001) { 
             console.log('debug: Animation de', points.length, 'points');
