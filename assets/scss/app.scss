@@ -3,15 +3,19 @@
 // =================================
 
 // Abstracts
-@use "abstracts/_variables.scss" ;
-@use "abstracts/_mixins.scss" ;
+@use "abstracts/variables";
+@use "abstracts/mixins";
 
 // Base
 @use "base/reset";
+@use "base/global"; // INFO: Styles globaux (body, canvas, accessibilité)
 
 // Layout uniquement
 @use "layout/container";
 
-// Les components seront réactivés plus tard
-// @import "components/hero";
-// @import "components/navigation";
+// Components
+@use "components/theme-navigation"; // INFO: Navigation des thèmes ajoutée
+
+// Les autres components seront réactivés plus tard
+// @use "components/hero";
+// @use "components/navigation";

@@ -1,0 +1,147 @@
+// INFO: Styles pour la navigation thématique
+@use "../abstracts/variables";
+@use "../abstracts/mixins";
+
+// INFO: Container principal de la navigation thématique
+.theme-navigation {
+  position: fixed;
+  top: variables.$spacing-sm;
+  left: variables.$spacing-sm;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: variables.$spacing-xs;
+  z-index: 1000; // INFO: Au-dessus du canvas mais sous les modales
+  
+  // INFO: Adaptation responsive pour mobile
+  @include mixins.mobile {
+    top: 0.75rem;
+    left: 0.75rem;
+    gap: 0.4rem;
+  }
+}
+
+// INFO: Boutons individuels de thème
+.theme-btn {
+  min-width: 65px;
+  min-height: 50px;
+  padding: variables.$spacing-xs;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: variables.$border-radius-sm;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(variables.$glass-blur);
+  color: variables.$text-color;
+  cursor: pointer;
+  transition: variables.$transition-normal;
+  
+  // INFO: Disposition flex pour centrer le contenu
+  @include mixins.flex-center;
+  flex-direction: column;
+  
+  // INFO: Styles au survol
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    @include mixins.hover-lift(2px, variables.$shadow-light);
+  }
+  
+  // INFO: État pressé/actif
+  &:active {
+    transform: translateY(1px);
+  }
+  
+  // INFO: État du thème actif
+  &--active {
+    background: rgba(variables.$primary-color, 0.2);
+    border-color: rgba(variables.$primary-color, 0.4);
+    color: variables.$primary-color;
+    
+    // INFO: Pas d'effet hover sur le bouton actif
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+  
+  // INFO: États de focus pour l'accessibilité
+  &:focus {
+    outline: none;
+    border-color: variables.$primary-color;
+    box-shadow: 0 0 0 2px rgba(variables.$primary-color, 0.3);
+  }
+  
+  // INFO: Responsive mobile
+  @include mixins.mobile {
+    min-width: 55px;
+    min-height: 45px;
+    padding: 0.4rem;
+  }
+}
+
+// INFO: Icône des boutons de thème
+.theme-btn__icon {
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+  display: block;
+  
+  // INFO: Transition pour les changements d'icône
+  transition: transform variables.$transition-normal;
+  
+  // INFO: Animation subtle au hover
+  .theme-btn:hover & {
+    transform: scale(1.1);
+  }
+  
+  // INFO: Taille réduite sur mobile
+  @include mixins.mobile {
+    font-size: 1rem;
+    margin-bottom: 0.1rem;
+  }
+}
+
+// INFO: Label textuel des boutons
+.theme-btn__label {
+  font-size: 0.7rem;
+  font-weight: variables.$font-weight-medium;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  
+  // INFO: Transition pour changements de couleur
+  transition: color variables.$transition-normal;
+  
+  // INFO: Taille encore plus réduite sur mobile
+  @include mixins.mobile {
+    font-size: 0.65rem;
+  }
+}
+
+// INFO: Animation d'entrée pour la navigation (optionnelle)
+.theme-navigation {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// INFO: États de désactivation pour maintenance ou chargement
+.theme-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// DEBUG: Bordures temporaires pour visualisation du layout
+// .theme-navigation {
+//   border: 2px dashed red;
+// }
+// .theme-btn {
+//   border: 1px dashed blue;
+// }
