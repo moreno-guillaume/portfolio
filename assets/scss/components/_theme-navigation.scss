@@ -2,29 +2,41 @@
 @use "../abstracts/variables";
 @use "../abstracts/mixins";
 
-// INFO: Container principal de la navigation thématique
+// INFO: Container des boutons de thèmes (3 premiers boutons)
 .theme-navigation {
   position: fixed;
-  top: variables.$spacing-sm;
-  left: variables.$spacing-sm;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  left: 7.5%; // INFO: Centré entre bord écran et main-container (70% width = 15% margin chaque côté / 2)
+  top: 20vh; // INFO: Alignement avec le début visible du main-container
+  display: flex;
+  flex-direction: column;
   gap: variables.$spacing-xs;
   z-index: 1000; // INFO: Au-dessus du canvas mais sous les modales
   
-  // INFO: Adaptation responsive pour mobile
+  // INFO: Responsive mobile
   @include mixins.mobile {
-    top: 0.75rem;
-    left: 0.75rem;
+    left: 5%;
     gap: 0.4rem;
   }
 }
 
-// INFO: Boutons individuels de thème
+// INFO: Bouton DevNotes positionné à droite
+.devnotes-navigation {
+  position: fixed;
+  right: 7.5%; // INFO: Symétrique avec les boutons de gauche
+  top: 20vh; // INFO: Même alignement que les autres boutons
+  z-index: 1000;
+  
+  // INFO: Responsive mobile
+  @include mixins.mobile {
+    right: 5%;
+  }
+}
+
+// INFO: Styles communs des boutons de thème
 .theme-btn {
-  min-width: 65px;
-  min-height: 50px;
-  padding: variables.$spacing-xs;
+  width: 50px;
+  height: 50px;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: variables.$border-radius-sm;
   background: rgba(255, 255, 255, 0.1);
@@ -33,9 +45,8 @@
   cursor: pointer;
   transition: variables.$transition-normal;
   
-  // INFO: Disposition flex pour centrer le contenu
+  // INFO: Centrage de l'icône uniquement
   @include mixins.flex-center;
-  flex-direction: column;
   
   // INFO: Styles au survol
   &:hover {
@@ -69,18 +80,16 @@
     box-shadow: 0 0 0 2px rgba(variables.$primary-color, 0.3);
   }
   
-  // INFO: Responsive mobile
+  // INFO: Responsive mobile - boutons plus petits
   @include mixins.mobile {
-    min-width: 55px;
-    min-height: 45px;
-    padding: 0.4rem;
+    width: 45px;
+    height: 45px;
   }
 }
 
-// INFO: Icône des boutons de thème
+// INFO: Icône des boutons de thème (plus grande sans texte)
 .theme-btn__icon {
-  font-size: 1.2rem;
-  margin-bottom: 0.2rem;
+  font-size: 1.5rem;
   display: block;
   
   // INFO: Transition pour les changements d'icône
@@ -91,39 +100,37 @@
     transform: scale(1.1);
   }
   
-  // INFO: Taille réduite sur mobile
+  // INFO: Taille adaptée sur mobile
   @include mixins.mobile {
-    font-size: 1rem;
-    margin-bottom: 0.1rem;
+    font-size: 1.3rem;
   }
 }
 
-// INFO: Label textuel des boutons
-.theme-btn__label {
-  font-size: 0.7rem;
-  font-weight: variables.$font-weight-medium;
-  text-align: center;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-  
-  // INFO: Transition pour changements de couleur
-  transition: color variables.$transition-normal;
-  
-  // INFO: Taille encore plus réduite sur mobile
-  @include mixins.mobile {
-    font-size: 0.65rem;
-  }
-}
-
-// INFO: Animation d'entrée pour la navigation (optionnelle)
+// INFO: Animation d'entrée pour les boutons de gauche
 .theme-navigation {
   animation: slideInFromLeft 0.3s ease-out;
+}
+
+// INFO: Animation d'entrée pour le bouton de droite
+.devnotes-navigation {
+  animation: slideInFromRight 0.3s ease-out;
 }
 
 @keyframes slideInFromLeft {
   from {
     opacity: 0;
     transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
@@ -142,6 +149,133 @@
 // .theme-navigation {
 //   border: 2px dashed red;
 // }
+// .devnotes-navigation {
+//   border: 2px dashed blue;
+// }
 // .theme-btn {
-//   border: 1px dashed blue;
+//   border: 1px dashed green;
+// }
+
+// INFO: Styles communs des boutons de thème
+.theme-btn {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: variables.$border-radius-sm;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(variables.$glass-blur);
+  color: variables.$text-color;
+  cursor: pointer;
+  transition: variables.$transition-normal;
+  
+  // INFO: Centrage de l'icône uniquement
+  @include mixins.flex-center;
+  
+  // INFO: Styles au survol
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    @include mixins.hover-lift(2px, variables.$shadow-light);
+  }
+  
+  // INFO: État pressé/actif
+  &:active {
+    transform: translateY(1px);
+  }
+  
+  // INFO: État du thème actif
+  &--active {
+    background: rgba(variables.$primary-color, 0.2);
+    border-color: rgba(variables.$primary-color, 0.4);
+    color: variables.$primary-color;
+    
+    // INFO: Pas d'effet hover sur le bouton actif
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+  
+  // INFO: États de focus pour l'accessibilité
+  &:focus {
+    outline: none;
+    border-color: variables.$primary-color;
+    box-shadow: 0 0 0 2px rgba(variables.$primary-color, 0.3);
+  }
+  
+  // INFO: Responsive mobile - boutons plus petits
+  @include mixins.mobile {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+// INFO: Icône des boutons de thème (plus grande sans texte)
+.theme-btn__icon {
+  font-size: 1.5rem;
+  display: block;
+  
+  // INFO: Transition pour les changements d'icône
+  transition: transform variables.$transition-normal;
+  
+  // INFO: Animation subtle au hover
+  .theme-btn:hover & {
+    transform: scale(1.1);
+  }
+  
+  // INFO: Taille adaptée sur mobile
+  @include mixins.mobile {
+    font-size: 1.3rem;
+  }
+}
+
+// INFO: Animation d'entrée pour les boutons de gauche
+.theme-navigation {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+// INFO: Animation d'entrée pour le bouton de droite
+.devnotes-navigation {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// INFO: États de désactivation pour maintenance ou chargement
+.theme-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// DEBUG: Bordures temporaires pour visualisation du layout
+// .theme-navigation {
+//   border: 2px dashed red;
+// }
+// .devnotes-navigation {
+//   border: 2px dashed blue;
+// }
+// .theme-btn {
+//   border: 1px dashed green;
 // }

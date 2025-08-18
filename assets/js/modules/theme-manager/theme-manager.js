@@ -39,6 +39,7 @@ export class ThemeManager {
         this.currentTheme = 'light';
         this.previousTheme = 'light'; // INFO: Pour DevNotes qui hérite du thème précédent
         this.buttonsContainer = null;
+        this.devnotesContainer = null; // INFO: Container séparé pour DevNotes
         this.backgroundModule = null;
         this.isInitialized = false;
 
@@ -71,23 +72,36 @@ export class ThemeManager {
 
     // INFO: Création des boutons de navigation thématique
     createThemeNavigation() {
-        // INFO: Container principal des boutons de thèmes
+        // INFO: Container pour les 3 boutons de thèmes principaux (gauche)
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.className = 'theme-navigation';
         this.buttonsContainer.setAttribute('role', 'navigation');
         this.buttonsContainer.setAttribute('aria-label', 'Navigation des thèmes');
 
-        // INFO: Génération des boutons pour chaque thème
+        // INFO: Container pour le bouton DevNotes (droite)
+        this.devnotesContainer = document.createElement('div');
+        this.devnotesContainer.className = 'devnotes-navigation';
+
+        // INFO: Génération des boutons pour chaque thème avec positionnement
         this.themes.forEach((themeConfig, themeKey) => {
             const button = this.createThemeButton(themeKey, themeConfig);
-            this.buttonsContainer.appendChild(button);
+            
+            // INFO: Séparation des boutons selon leur type
+            if (themeKey === 'devnotes') {
+                // INFO: DevNotes va dans le container de droite
+                this.devnotesContainer.appendChild(button);
+            } else {
+                // INFO: Les autres thèmes vont dans le container de gauche
+                this.buttonsContainer.appendChild(button);
+            }
         });
 
-        // INFO: Insertion dans le DOM en début de body
+        // INFO: Insertion des deux containers dans le DOM
         document.body.appendChild(this.buttonsContainer);
+        document.body.appendChild(this.devnotesContainer);
         
         // DEBUG: Vérification de l'insertion DOM
-        console.log('debug: Navigation thématique ajoutée au DOM avec', this.themes.size, 'boutons');
+        console.log('debug: Navigation thématique créée avec 3 boutons à gauche et 1 à droite');
     }
 
     // INFO: Création d'un bouton de thème individuel
@@ -99,10 +113,9 @@ export class ThemeManager {
         button.setAttribute('aria-label', `Activer le thème ${themeConfig.name}`);
         button.setAttribute('title', `Thème ${themeConfig.name}`);
 
-        // INFO: Contenu du bouton avec icône et texte
+        // INFO: Contenu du bouton avec icône uniquement (pas de texte)
         button.innerHTML = `
             <span class="theme-btn__icon">${themeConfig.icon}</span>
-            <span class="theme-btn__label">${themeConfig.name}</span>
         `;
 
         // INFO: Marquage du thème actuel
@@ -118,8 +131,15 @@ export class ThemeManager {
 
     // INFO: Configuration des événements utilisateur
     setupEventListeners() {
-        // INFO: Délégation d'événements sur le container pour optimiser les performances
+        // INFO: Délégation d'événements sur les deux containers pour optimiser les performances
         this.buttonsContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('.theme-btn');
+            if (button && button.dataset.theme) {
+                this.switchTheme(button.dataset.theme);
+            }
+        });
+
+        this.devnotesContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.theme-btn');
             if (button && button.dataset.theme) {
                 this.switchTheme(button.dataset.theme);
@@ -132,7 +152,7 @@ export class ThemeManager {
         });
 
         // DEBUG: Vérification de l'attachement des événements
-        console.log('debug: Événements de navigation thématique configurés');
+        console.log('debug: Événements de navigation thématique configurés sur les deux containers');
     }
 
     // INFO: Gestion de la navigation clavier pour l'accessibilité
@@ -249,11 +269,15 @@ export class ThemeManager {
 
     // INFO: Mise à jour de l'état visuel des boutons
     updateButtonsState(activeTheme) {
-        if (!this.buttonsContainer) return;
+        if (!this.buttonsContainer && !this.devnotesContainer) return;
 
-        const buttons = this.buttonsContainer.querySelectorAll('.theme-btn');
+        // INFO: Recherche des boutons dans les deux containers
+        const allButtons = [
+            ...this.buttonsContainer.querySelectorAll('.theme-btn'),
+            ...this.devnotesContainer.querySelectorAll('.theme-btn')
+        ];
         
-        buttons.forEach(button => {
+        allButtons.forEach(button => {
             const isActive = button.dataset.theme === activeTheme;
             
             // INFO: Mise à jour des classes et attributs ARIA
@@ -281,7 +305,7 @@ export class ThemeManager {
 
     // INFO: Vérification de l'état d'initialisation
     isReady() {
-        return this.isInitialized && this.buttonsContainer !== null;
+        return this.isInitialized && this.buttonsContainer !== null && this.devnotesContainer !== null;
     }
 
     // INFO: Nettoyage complet du module
@@ -290,6 +314,11 @@ export class ThemeManager {
         if (this.buttonsContainer) {
             this.buttonsContainer.remove();
             this.buttonsContainer = null;
+        }
+
+        if (this.devnotesContainer) {
+            this.devnotesContainer.remove();
+            this.devnotesContainer = null;
         }
 
         // INFO: Réinitialisation des références
