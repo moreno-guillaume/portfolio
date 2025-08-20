@@ -6,10 +6,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "copy-icons": "mkdir -p public/fonts/bootstrap-icons && cp node_modules/bootstrap-icons/font/fonts/* public/fonts/bootstrap-icons/",
+    "dev": "npm run copy-icons && vite",
+    "build": "npm run copy-icons && vite build"
   },
   "repository": {
     "type": "git",
@@ -27,5 +26,10 @@
     "@types/node": "^24.3.0",
     "sass": "^1.90.0",
     "vite": "^7.1.2"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1"
   }
 }

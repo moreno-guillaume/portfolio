@@ -6,7 +6,8 @@
 .theme-navigation {
   position: fixed;
   left: 7.5%; // INFO: Centré entre bord écran et main-container (70% width = 15% margin chaque côté / 2)
-  top: 20vh; // INFO: Alignement avec le début visible du main-container
+  top: 7%; // INFO: Exactement même top que le main-container
+  transform: translateY(variables.$spacing-lg); // INFO: Décalage pour aligner avec le contenu visible
   display: flex;
   flex-direction: column;
   gap: variables.$spacing-xs;
@@ -23,7 +24,8 @@
 .devnotes-navigation {
   position: fixed;
   right: 7.5%; // INFO: Symétrique avec les boutons de gauche
-  top: 20vh; // INFO: Même alignement que les autres boutons
+  top: 7.5%; // INFO: Même top que le main-container
+  transform: translateY(variables.$spacing-lg); // INFO: Même décalage que les autres boutons
   z-index: 1000;
   
   // INFO: Responsive mobile
@@ -34,25 +36,33 @@
 
 // INFO: Styles communs des boutons de thème
 .theme-btn {
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.6); // INFO: Bordure plus visible
   border-radius: variables.$border-radius-sm;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.25); // INFO: Fond plus opaque pour contraste
   backdrop-filter: blur(variables.$glass-blur);
   color: variables.$text-color;
   cursor: pointer;
   transition: variables.$transition-normal;
+  
+  // INFO: Ombre pour améliorer la visibilité
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   
   // INFO: Centrage de l'icône uniquement
   @include mixins.flex-center;
   
   // INFO: Styles au survol
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    @include mixins.hover-lift(2px, variables.$shadow-light);
+    background: rgba(255, 255, 255, 0.35); // INFO: Plus opaque au survol
+    border-color: rgba(255, 255, 255, 0.8);
+    @include mixins.hover-lift(2px, rgba(0, 0, 0, 0.2));
+    
+    // INFO: Icône plus visible au survol
+    .theme-btn__icon {
+      color: variables.$text-dark;
+    }
   }
   
   // INFO: État pressé/actif
@@ -60,16 +70,17 @@
     transform: translateY(1px);
   }
   
-  // INFO: État du thème actif
+  // INFO: État du thème actif - beaucoup plus visible
   &--active {
-    background: rgba(variables.$primary-color, 0.2);
-    border-color: rgba(variables.$primary-color, 0.4);
-    color: variables.$primary-color;
+    background: rgba(variables.$primary-color, 0.4); // INFO: Plus opaque
+    border-color: rgba(variables.$primary-color, 0.8); // INFO: Bordure plus marquée
+    color: white; // INFO: Texte blanc pour contraste maximum
+    box-shadow: 0 4px 16px rgba(variables.$primary-color, 0.3); // INFO: Ombre colorée
     
     // INFO: Pas d'effet hover sur le bouton actif
     &:hover {
       transform: none;
-      box-shadow: none;
+      box-shadow: 0 4px 16px rgba(variables.$primary-color, 0.4);
     }
   }
   
@@ -77,7 +88,7 @@
   &:focus {
     outline: none;
     border-color: variables.$primary-color;
-    box-shadow: 0 0 0 2px rgba(variables.$primary-color, 0.3);
+    box-shadow: 0 0 0 3px rgba(variables.$primary-color, 0.4);
   }
   
   // INFO: Responsive mobile - boutons plus petits
@@ -87,17 +98,25 @@
   }
 }
 
-// INFO: Icône des boutons de thème (plus grande sans texte)
+// INFO: Icône des boutons de thème (plus contrastée)
 .theme-btn__icon {
   font-size: 1.5rem;
   display: block;
+  color: variables.$text-dark; // INFO: Couleur sombre pour contraste
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); // INFO: Ombre pour lisibilité
   
   // INFO: Transition pour les changements d'icône
-  transition: transform variables.$transition-normal;
+  transition: all variables.$transition-normal;
   
   // INFO: Animation subtle au hover
   .theme-btn:hover & {
     transform: scale(1.1);
+  }
+  
+  // INFO: Couleur spéciale pour bouton actif
+  .theme-btn--active & {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   
   // INFO: Taille adaptée sur mobile
@@ -105,6 +124,56 @@
     font-size: 1.3rem;
   }
 }
+
+// INFO: Animation d'entrée pour les boutons de gauche
+.theme-navigation {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+// INFO: Animation d'entrée pour le bouton de droite
+.devnotes-navigation {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) translateY(variables.$spacing-lg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(variables.$spacing-lg);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px) translateY(variables.$spacing-lg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(variables.$spacing-lg);
+  }
+}
+
+// INFO: États de désactivation pour maintenance ou chargement
+.theme-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// DEBUG: Bordures temporaires pour visualisation du layout
+// .theme-navigation {
+//   border: 2px dashed red;
+// }
+// .devnotes-navigation {
+//   border: 2px dashed blue;
+// }
+// .theme-btn {
+//   border: 1px dashed green;
+// }
 
 // INFO: Animation d'entrée pour les boutons de gauche
 .theme-navigation {
