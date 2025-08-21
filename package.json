@@ -1,11 +1,11 @@
 {
   "name": "portfolio",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
-
   "scripts": {
     "copy-icons": "if not exist \"public\\fonts\\bootstrap-icons\" mkdir \"public\\fonts\\bootstrap-icons\" && xcopy \"node_modules\\bootstrap-icons\\font\\fonts\\*\" \"public\\fonts\\bootstrap-icons\\\" /Y /Q",
     "dev": "npm run copy-icons && vite",
@@ -17,7 +17,6 @@
     "lint:fix": "eslint assets/js/**/*.js --fix",
     "validate": "npm run clean:test && npm run format && npm run lint",
     "production": "npm run clean && npm run format && npm run lint"
-
   },
   "repository": {
     "type": "git",
@@ -34,11 +33,9 @@
   "devDependencies": {
     "@types/node": "^24.3.0",
     "sass": "^1.90.0",
-
     "vite": "^7.1.2",
     "prettier": "^3.1.0",
     "eslint": "^8.57.0"
-
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
