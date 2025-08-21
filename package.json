@@ -5,8 +5,8 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {
-    "copy-icons": "mkdir -p public/fonts/bootstrap-icons && cp node_modules/bootstrap-icons/font/fonts/* public/fonts/bootstrap-icons/",
+    "scripts": {
+    "copy-icons": "if not exist \"public\\fonts\\bootstrap-icons\" mkdir \"public\\fonts\\bootstrap-icons\" && xcopy \"node_modules\\bootstrap-icons\\font\\fonts\\*\" \"public\\fonts\\bootstrap-icons\\\" /Y /Q",
     "dev": "npm run copy-icons && vite",
     "build": "npm run copy-icons && vite build"
   },
