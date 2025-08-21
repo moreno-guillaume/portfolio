@@ -1,10 +1,6 @@
 import '../scss/app.scss'
 
 
-
-// INFO: import complet de Bootstrap JavaScript avec tous les composants
-import * as bootstrap from 'bootstrap'
-
 // INFO: import du module de gestion du background animé
 import { BackgroundModule } from './modules/background/index.js'
 
