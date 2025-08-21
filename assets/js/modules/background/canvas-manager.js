@@ -20,7 +20,7 @@ export class CanvasManager {
         };
 
         if (!colors.background) {
-            console.log('debug: variables CSS introuvables, utilisation des couleurs par défaut');
+
             colors.background = '#D3DDE4';
             colors.points = '#5E5E5E';
             colors.connections = 'rgba(94, 94, 94, 1)';
@@ -33,7 +33,7 @@ export class CanvasManager {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         
-        console.log('debug: canvas redimensionné', { 
+
             width: this.canvas.width, 
             height: this.canvas.height 
         });
@@ -50,7 +50,7 @@ export class CanvasManager {
             const pointB = points[connection.to];
 
             if (!pointA || !pointB) {
-                console.log('debug: connexion ignorée, point manquant', { from: connection.from, to: connection.to });
+
                 return;
             }
 
@@ -67,7 +67,7 @@ export class CanvasManager {
     drawPoints(points) {
         points.forEach((point, index) => {
             if (point.x < 0 || point.y < 0) {
-                console.log('debug: point avec coordonnées négatives ignoré', { x: point.x, y: point.y, index });
+
             }
             
             this.ctx.beginPath();
@@ -80,7 +80,7 @@ export class CanvasManager {
 
     updateThemeColors() {
         this.colors = this.getThemeColors();
-        console.log('debug: couleurs du thème mises à jour', this.colors);
+
     }
 
     getWidth() {
@@ -99,13 +99,13 @@ export class CanvasManager {
 
     onResize(callback) {
         window.addEventListener('resize', () => {
-            console.log('debug: redimensionnement détecté');
+
             
             this.setupCanvas();
             
             if (typeof callback === 'function') {
                 callback();
-                console.log('debug: callback de redimensionnement exécuté');
+
             }
         });
     }

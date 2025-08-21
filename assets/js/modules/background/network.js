@@ -36,14 +36,14 @@ export class NetworkBackground {
             this.mouse.y = e.clientY;
             
             if (Math.random() < 0.01) { 
-                console.log('debug: position souris mise à jour:', { x: this.mouse.x, y: this.mouse.y });
+
             }
         });
     }
 
     setupResizeEvents() {
         this.canvasManager.onResize(() => {
-            console.log('debug: redimensionnement détecté, recalcul des points');
+
 
             this.pointGenerator.updateCanvasDimensions(
                 this.canvasManager.getWidth(),
@@ -93,7 +93,7 @@ export class NetworkBackground {
         }
         
         if (Math.random() < 0.1) { 
-            console.log('debug: connexions calculées:', {
+
                 total: connectionsCalculated, 
                 points: this.points.length,
                 ratio: (connectionsCalculated / (this.points.length * (this.points.length - 1) / 2)).toFixed(3)
@@ -118,13 +118,13 @@ export class NetworkBackground {
 
         const frameTime = performance.now() - frameStart;
         if (Math.random() < 0.01) { 
-            console.log('debug: performance frame:', {
+
                 frameTime: frameTime.toFixed(2) + 'ms',
                 fps: Math.round(1000 / frameTime)
             });
 
             if (frameTime > 16.67) { 
-                console.warn('debug: frame lente détectée');
+
             }
         }
 
@@ -132,10 +132,10 @@ export class NetworkBackground {
     }
 
     startAnimation() {
-        console.log('debug: démarrage de l\'animation');
+
 
         if (this.animationId) {
-            console.log('debug: arrêt de l\'animation précédente');
+
             this.stopAnimation();
         }
         
@@ -146,14 +146,14 @@ export class NetworkBackground {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
-            console.log('debug: animation arrêtée');
+
         } else {
-            console.log('debug: aucune animation à arrêter');
+
         }
     }
 
     destroy() {
-        console.log('debug: destruction de NetworkBackground');
+
         this.stopAnimation();
     }
 }

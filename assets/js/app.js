@@ -26,9 +26,9 @@ class App {
 
             setTimeout(() => {
                 if (networkBackground && networkBackground.animationId) {
-                    console.log('debug: animation background démarrée avec succès');
+
                 } else {
-                    console.warn('debug: problème avec l\'animation background');
+
                 }
             }, 1000);
             
@@ -46,9 +46,9 @@ class App {
             this.modules.set('themeManager', themeManager);
             
             if (themeManager.isReady()) {
-                console.log('debug: ThemeManager initialisé avec succès');
+
             } else {
-                console.warn('debug: ThemeManager non prêt');
+
             }
             
         } catch (error) {
@@ -61,7 +61,7 @@ class App {
         const module = this.modules.get(moduleName);
         
         if (!module) {
-            console.warn('debug: module introuvable:', {
+
                 moduleName, 
                 available: Array.from(this.modules.keys()) 
             });
@@ -75,7 +75,7 @@ class App {
             if (module && typeof module.destroy === 'function') {
                 try {
                     module.destroy();
-                    console.log('debug: module détruit:', name);
+
                 } catch (error) {
                     console.error('Erreur lors de la destruction du module:', name, error);
                 }
@@ -83,7 +83,7 @@ class App {
         });
         
         this.modules.clear();
-        console.log('debug: tous les modules ont été nettoyés');
+
     }
 }
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.App = new App();
         
         if (window.App) {
-            console.log('debug: Application démarrée avec succès');
+
         }
         
     } catch (error) {
@@ -108,7 +108,7 @@ window.addEventListener('beforeunload', () => {
             console.error('Erreur lors du nettoyage:', error);
         }
     } else {
-        console.warn('debug: aucune app à nettoyer');
+
     }
 });
 
@@ -148,10 +148,10 @@ if (import.meta.env.DEV) {
                 if (networkBg) {
                     networkBg.stopAnimation();
                     networkBg.startAnimation();
-                    console.log('debug: animation redémarrée');
+
                 }
             } else {
-                console.warn('debug: impossible de redémarrer l\'animation');
+
             }
         },
 
@@ -159,10 +159,10 @@ if (import.meta.env.DEV) {
             const themeManager = window.App?.getModule('themeManager');
             if (themeManager && themeManager.isReady()) {
                 const result = themeManager.switchTheme(themeName);
-                console.log('debug: thème changé vers:', themeName);
+
                 return result;
             } else {
-                console.warn('debug: ThemeManager non disponible');
+
                 return false;
             }
         },
@@ -195,10 +195,10 @@ if (import.meta.env.DEV) {
                 stats.theme = themeManager.getCurrentTheme();
             }
             
-            console.log('debug: stats de l\'application:', stats);
+
             return stats;
         }
     };
 
-    console.log('debug: DebugUtils disponibles dans window.DebugUtils');
+
 }
