@@ -1,4 +1,6 @@
+
 import '../scss/app.scss';
+
 
 // INFO: import du module de gestion du background animé
 import { BackgroundModule } from './modules/background/index.js';
