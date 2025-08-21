@@ -1,8 +1,7 @@
 
-/* INFO: Container principal de l'application avec Bootstrap */
+
 @use "../abstracts/variables";
 @use "../abstracts/mixins";
-
 
 
 .main-container {
@@ -12,7 +11,7 @@
   height: 100vh;
   @include mixins.flex-center;
   z-index: variables.$z-content;
-  
+
   pointer-events: none;
 }
 
@@ -23,28 +22,22 @@
   text-align: center;
   pointer-events: auto;
 
-  
-
-  /* INFO: Effet glassmorphism subtil avec Bootstrap classes possibles */
-
 
   @include mixins.glassmorphism(0.5);
   border-radius: variables.$border-radius-md;
   border: 1px dashed rgba(255, 255, 255, 0.3);
-  
 
-  /* INFO: Support des composants Bootstrap à l'intérieur */
 
   .btn {
     backdrop-filter: blur(10px);
   }
-  
+
   .card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  
+
   .alert {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
