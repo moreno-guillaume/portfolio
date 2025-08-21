@@ -1,66 +1,63 @@
-// INFO: Module de gestion des thèmes visuels de l'application
-// INFO: Contrôle les couleurs du canvas et l'interface selon le thème sélectionné
+// INFO: Module de gestion des thèmes visuels et du toggle DevNotes
+// INFO: Sépare la logique thèmes (mutuellement exclusifs) et DevNotes (toggle indépendant)
 
 export class ThemeManager {
     constructor() {
-        // INFO: Map des thèmes disponibles avec leurs configurations
+        // INFO: Map des thèmes principaux uniquement (sans DevNotes)
         this.themes = new Map([
             ['light', {
                 name: 'Clair',
                 canvasBackground: '#e3ecf0',
                 canvasPoints: '#5E5E5E', 
                 canvasConnections: 'rgba(94, 94, 94, 1)',
-                icon: '☀️'
+                iconClass: 'bi-sun',
+                buttonStyle: 'light'
             }],
             ['dark', {
                 name: 'Sombre',
                 canvasBackground: '#1a1a1a',
                 canvasPoints: '#ecf0f1',
                 canvasConnections: 'rgba(236, 240, 241, 1)',
-                icon: '🌙'
+                iconClass: 'bi-moon',
+                buttonStyle: 'dark'
             }],
             ['colorblind', {
                 name: 'Accessible',
                 canvasBackground: '#f0f4f8',
                 canvasPoints: '#0066cc',
                 canvasConnections: 'rgba(0, 102, 204, 1)',
-                icon: '👁️'
-            }],
-            ['devnotes', {
-                name: 'DevNotes',
-                canvasBackground: '#f8f9fa', // INFO: Sera hérité dynamiquement
-                canvasPoints: '#6c757d',
-                canvasConnections: 'rgba(108, 117, 125, 1)',
-                icon: '📝'
+                iconClass: 'bi-eye',
+                buttonStyle: 'light'
             }]
         ]);
 
-        // INFO: État actuel du gestionnaire de thèmes
+        // INFO: Configuration DevNotes séparée (pas un thème)
+        this.devNotesConfig = {
+            name: 'DevNotes',
+            iconClass: 'bi-journal-code'
+        };
+
+        // INFO: États séparés pour thèmes et DevNotes
         this.currentTheme = 'light';
-        this.previousTheme = 'light'; // INFO: Pour DevNotes qui hérite du thème précédent
+        this.isDevNotesActive = false; // INFO: État indépendant du toggle DevNotes
+        
         this.buttonsContainer = null;
-        this.devnotesContainer = null; // INFO: Container séparé pour DevNotes
+        this.devnotesContainer = null;
         this.backgroundModule = null;
         this.isInitialized = false;
 
-        // DEBUG: Vérification de l'initialisation
-        console.log('debug: ThemeManager créé avec', this.themes.size, 'thèmes disponibles');
+        console.log('debug: ThemeManager créé avec', this.themes.size, 'thèmes et DevNotes indépendant');
     }
 
-    // INFO: Initialisation du module avec création de l'interface
     async init(backgroundModule = null) {
         try {
-            // INFO: Référence vers le module de background pour mise à jour des couleurs
             this.backgroundModule = backgroundModule;
-
-            // INFO: Création de l'interface utilisateur
             this.createThemeNavigation();
             this.setupEventListeners();
             this.applyTheme(this.currentTheme);
 
             this.isInitialized = true;
             console.log('info: ThemeManager initialisé avec succès');
-
             return this;
             
         } catch (error) {
@@ -70,9 +67,8 @@ export class ThemeManager {
         }
     }
 
-    // INFO: Création des boutons de navigation thématique
     createThemeNavigation() {
-        // INFO: Container pour les 3 boutons de thèmes principaux (gauche)
+        // INFO: Container pour les 3 boutons de thèmes (gauche)
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.className = 'theme-navigation';
         this.buttonsContainer.setAttribute('role', 'navigation');
@@ -82,29 +78,23 @@ export class ThemeManager {
         this.devnotesContainer = document.createElement('div');
         this.devnotesContainer.className = 'devnotes-navigation';
 
-        // INFO: Génération des boutons pour chaque thème avec positionnement
+        // INFO: Création des boutons de thèmes principaux
         this.themes.forEach((themeConfig, themeKey) => {
             const button = this.createThemeButton(themeKey, themeConfig);
-            
-            // INFO: Séparation des boutons selon leur type
-            if (themeKey === 'devnotes') {
-                // INFO: DevNotes va dans le container de droite
-                this.devnotesContainer.appendChild(button);
-            } else {
-                // INFO: Les autres thèmes vont dans le container de gauche
-                this.buttonsContainer.appendChild(button);
-            }
+            this.buttonsContainer.appendChild(button);
         });
 
-        // INFO: Insertion des deux containers dans le DOM
+        // INFO: Création du bouton DevNotes séparé
+        const devNotesButton = this.createDevNotesButton();
+        this.devnotesContainer.appendChild(devNotesButton);
+
+        // INFO: Insertion dans le DOM
         document.body.appendChild(this.buttonsContainer);
         document.body.appendChild(this.devnotesContainer);
         
-        // DEBUG: Vérification de l'insertion DOM
-        console.log('debug: Navigation thématique créée avec 3 boutons à gauche et 1 à droite');
+        console.log('debug: Navigation créée avec 3 thèmes mutuellement exclusifs + DevNotes toggle');
     }
 
-    // INFO: Création d'un bouton de thème individuel
     createThemeButton(themeKey, themeConfig) {
         const button = document.createElement('button');
         button.className = 'theme-btn';
@@ -113,10 +103,7 @@ export class ThemeManager {
         button.setAttribute('aria-label', `Activer le thème ${themeConfig.name}`);
         button.setAttribute('title', `Thème ${themeConfig.name}`);
 
-        // INFO: Contenu du bouton avec icône uniquement (pas de texte)
-        button.innerHTML = `
-            <span class="theme-btn__icon">${themeConfig.icon}</span>
-        `;
+        button.innerHTML = `<i class="theme-btn__icon bi ${themeConfig.iconClass}"></i>`;
 
         // INFO: Marquage du thème actuel
         if (themeKey === this.currentTheme) {
@@ -129,9 +116,26 @@ export class ThemeManager {
         return button;
     }
 
-    // INFO: Configuration des événements utilisateur
+    // INFO: Création du bouton DevNotes avec logique de toggle
+    createDevNotesButton() {
+        const button = document.createElement('button');
+        button.className = 'theme-btn';
+        button.dataset.action = 'devnotes'; // INFO: data-action au lieu de data-theme
+        button.setAttribute('type', 'button');
+        button.setAttribute('aria-label', `Toggle ${this.devNotesConfig.name}`);
+        button.setAttribute('title', this.devNotesConfig.name);
+
+        button.innerHTML = `<i class="theme-btn__icon bi ${this.devNotesConfig.iconClass}"></i>`;
+
+        // INFO: État initial du toggle DevNotes
+        button.classList.toggle('theme-btn--active', this.isDevNotesActive);
+        button.setAttribute('aria-pressed', this.isDevNotesActive.toString());
+
+        return button;
+    }
+
     setupEventListeners() {
-        // INFO: Délégation d'événements sur les deux containers pour optimiser les performances
+        // INFO: Événements pour les boutons de thèmes (gauche)
         this.buttonsContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.theme-btn');
             if (button && button.dataset.theme) {
@@ -139,76 +143,88 @@ export class ThemeManager {
             }
         });
 
+        // INFO: Événements pour le bouton DevNotes (droite)
         this.devnotesContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.theme-btn');
-            if (button && button.dataset.theme) {
-                this.switchTheme(button.dataset.theme);
+            if (button && button.dataset.action === 'devnotes') {
+                this.toggleDevNotes();
             }
         });
 
-        // INFO: Support du clavier pour l'accessibilité
+        // INFO: Support clavier
         document.addEventListener('keydown', (event) => {
             this.handleKeyboardNavigation(event);
         });
 
-        // DEBUG: Vérification de l'attachement des événements
-        console.log('debug: Événements de navigation thématique configurés sur les deux containers');
+        console.log('debug: Événements configurés séparément pour thèmes et DevNotes');
     }
 
-    // INFO: Gestion de la navigation clavier pour l'accessibilité
     handleKeyboardNavigation(event) {
-        // INFO: Raccourcis clavier pour changement rapide de thème
-        const themeKeys = {
-            'Digit1': 'light',
-            'Digit2': 'dark', 
-            'Digit3': 'colorblind',
-            'Digit4': 'devnotes'
+        const actionKeys = {
+            'Digit1': () => this.switchTheme('light'),
+            'Digit2': () => this.switchTheme('dark'), 
+            'Digit3': () => this.switchTheme('colorblind'),
+            'Digit4': () => this.toggleDevNotes() // INFO: DevNotes = toggle, pas switch
         };
         
-        // INFO: Application du thème si touche valide pressée
-        if (themeKeys[event.code] && event.target === document.body) {
+        if (actionKeys[event.code] && event.target === document.body) {
             event.preventDefault();
-            this.switchTheme(themeKeys[event.code]);
-            
-            // DEBUG: Log des raccourcis clavier utilisés
-            console.log('debug: Changement de thème via clavier:', themeKeys[event.code]);
+            actionKeys[event.code]();
+            console.log('debug: Action clavier:', event.code);
         }
     }
 
-    // INFO: Changement de thème principal avec validation
+    // INFO: Changement de thème (mutuellement exclusif)
     switchTheme(newTheme) {
-        // INFO: Validation de l'existence du thème demandé
         if (!this.themes.has(newTheme)) {
-            console.warn('debug: Thème demandé inexistant:', newTheme);
+            console.warn('debug: Thème inexistant:', newTheme);
             return false;
         }
 
-        // INFO: Pas de changement si c'est le thème actuel
         if (newTheme === this.currentTheme) {
             console.log('debug: Thème déjà actif:', newTheme);
             return false;
         }
 
-        // INFO: Sauvegarde du thème précédent pour DevNotes
-        if (newTheme === 'devnotes') {
-            // INFO: DevNotes hérite du thème précédent
-            this.previousTheme = this.currentTheme;
-        } else {
-            this.previousTheme = this.currentTheme;
-            this.currentTheme = newTheme;
-        }
-
-        // INFO: Application du nouveau thème
+        this.currentTheme = newTheme;
         this.applyTheme(newTheme);
-        this.updateButtonsState(newTheme);
+        this.updateThemeButtonsState();
 
-        // DEBUG: Confirmation du changement de thème
-        console.log('debug: Thème changé de', this.previousTheme, 'vers', newTheme);
-        
+        console.log('debug: Thème changé vers:', newTheme);
         return true;
     }
 
-    // INFO: Application des couleurs d'un thème au canvas
+    // INFO: Toggle DevNotes (indépendant des thèmes)
+    toggleDevNotes() {
+        this.isDevNotesActive = !this.isDevNotesActive;
+        this.updateDevNotesButtonState();
+
+        // INFO: Ici vous pouvez ajouter la logique spécifique à DevNotes
+        // Par exemple : afficher/masquer des informations, changer l'interface, etc.
+        this.handleDevNotesToggle(this.isDevNotesActive);
+
+        console.log('debug: DevNotes toggle:', this.isDevNotesActive ? 'ON' : 'OFF');
+        return this.isDevNotesActive;
+    }
+
+    // INFO: Gestion de l'activation/désactivation de DevNotes
+    handleDevNotesToggle(isActive) {
+        // TODO: Implémenter la logique spécifique DevNotes
+        // Exemples possibles :
+        // - Afficher/masquer des panels d'informations
+        // - Modifier l'interface utilisateur
+        // - Activer/désactiver des fonctionnalités de debug
+        // - Changer le contenu du main-container
+        
+        if (isActive) {
+            console.log('info: DevNotes activé - implémenter logique spécifique');
+            // Exemple : document.body.classList.add('devnotes-mode');
+        } else {
+            console.log('info: DevNotes désactivé - nettoyer interface');
+            // Exemple : document.body.classList.remove('devnotes-mode');
+        }
+    }
+
     applyTheme(themeKey) {
         const theme = this.themes.get(themeKey);
         if (!theme) {
@@ -216,101 +232,69 @@ export class ThemeManager {
             return;
         }
 
-        // INFO: Gestion spéciale pour DevNotes qui hérite des couleurs
-        let colorsToApply = theme;
-        if (themeKey === 'devnotes' && this.previousTheme !== 'devnotes') {
-            const previousThemeConfig = this.themes.get(this.previousTheme);
-            if (previousThemeConfig) {
-                // INFO: DevNotes utilise les couleurs du thème précédent
-                colorsToApply = {
-                    ...theme,
-                    canvasBackground: previousThemeConfig.canvasBackground,
-                    canvasPoints: previousThemeConfig.canvasPoints,
-                    canvasConnections: previousThemeConfig.canvasConnections
-                };
-                console.log('debug: DevNotes hérite des couleurs de:', this.previousTheme);
-            }
-        }
+        // INFO: Mise à jour uniquement des couleurs du canvas, pas des boutons
+        this.updateCanvasColors(theme);
 
-        // INFO: Mise à jour des variables CSS pour le canvas
-        this.updateCanvasColors(colorsToApply);
-
-        // INFO: Notification du module de background si disponible
         if (this.backgroundModule && this.backgroundModule.isReady()) {
             const networkBackground = this.backgroundModule.getNetworkBackground();
             if (networkBackground && networkBackground.canvasManager) {
-                // INFO: Demande de mise à jour des couleurs du canvas
                 networkBackground.canvasManager.updateThemeColors();
-                console.log('debug: Couleurs du canvas mises à jour pour le thème:', themeKey);
+                console.log('debug: Canvas mis à jour pour le thème:', themeKey);
             }
         }
-
-        // DEBUG: Affichage des couleurs appliquées
-        console.log('debug: Couleurs appliquées:', {
-            theme: themeKey,
-            background: colorsToApply.canvasBackground,
-            points: colorsToApply.canvasPoints
-        });
     }
 
-    // INFO: Mise à jour des variables CSS personnalisées
     updateCanvasColors(themeConfig) {
         const root = document.documentElement;
-        
-        // INFO: Application des nouvelles variables CSS
         root.style.setProperty('--canvas-background', themeConfig.canvasBackground);
         root.style.setProperty('--canvas-points', themeConfig.canvasPoints);
         root.style.setProperty('--canvas-connections', themeConfig.canvasConnections);
-
-        // DEBUG: Vérification de l'application des variables
-        const updatedBg = getComputedStyle(root).getPropertyValue('--canvas-background').trim();
-        console.log('debug: Variable CSS mise à jour --canvas-background:', updatedBg);
+        // INFO: Les boutons gardent un style uniforme, pas de variables CSS pour eux
     }
 
-    // INFO: Mise à jour de l'état visuel des boutons
-    updateButtonsState(activeTheme) {
-        if (!this.buttonsContainer && !this.devnotesContainer) return;
+    // INFO: Supprimé updateButtonsStyle() - les boutons gardent un style uniforme
 
-        // INFO: Recherche des boutons dans les deux containers
-        const allButtons = [
-            ...this.buttonsContainer.querySelectorAll('.theme-btn'),
-            ...this.devnotesContainer.querySelectorAll('.theme-btn')
-        ];
-        
-        allButtons.forEach(button => {
-            const isActive = button.dataset.theme === activeTheme;
-            
-            // INFO: Mise à jour des classes et attributs ARIA
+    // INFO: Mise à jour des boutons de thèmes uniquement
+    updateThemeButtonsState() {
+        if (!this.buttonsContainer) return;
+
+        const themeButtons = this.buttonsContainer.querySelectorAll('.theme-btn');
+        themeButtons.forEach(button => {
+            const isActive = button.dataset.theme === this.currentTheme;
             button.classList.toggle('theme-btn--active', isActive);
             button.setAttribute('aria-pressed', isActive.toString());
         });
-
-        // DEBUG: Confirmation de la mise à jour des boutons
-        console.log('debug: État des boutons mis à jour pour le thème:', activeTheme);
     }
 
-    // INFO: Récupération du thème actuellement actif
+    // INFO: Mise à jour du bouton DevNotes uniquement
+    updateDevNotesButtonState() {
+        if (!this.devnotesContainer) return;
+
+        const devNotesButton = this.devnotesContainer.querySelector('.theme-btn');
+        if (devNotesButton) {
+            devNotesButton.classList.toggle('theme-btn--active', this.isDevNotesActive);
+            devNotesButton.setAttribute('aria-pressed', this.isDevNotesActive.toString());
+        }
+    }
+
+    // INFO: Getters pour l'état actuel
     getCurrentTheme() {
         return {
-            current: this.currentTheme,
-            previous: this.previousTheme,
-            config: this.themes.get(this.currentTheme)
+            theme: this.currentTheme,
+            devNotes: this.isDevNotesActive,
+            themeConfig: this.themes.get(this.currentTheme)
         };
     }
 
-    // INFO: Récupération de la configuration d'un thème spécifique
     getThemeConfig(themeKey) {
         return this.themes.get(themeKey) || null;
     }
 
-    // INFO: Vérification de l'état d'initialisation
     isReady() {
         return this.isInitialized && this.buttonsContainer !== null && this.devnotesContainer !== null;
     }
 
-    // INFO: Nettoyage complet du module
     destroy() {
-        // INFO: Suppression des événements et éléments DOM
         if (this.buttonsContainer) {
             this.buttonsContainer.remove();
             this.buttonsContainer = null;
@@ -321,10 +305,8 @@ export class ThemeManager {
             this.devnotesContainer = null;
         }
 
-        // INFO: Réinitialisation des références
         this.backgroundModule = null;
         this.isInitialized = false;
-
         console.log('info: ThemeManager détruit proprement');
     }
 }
