@@ -1,86 +1,66 @@
 <?php
 /**
- * Script de nettoyage intelligent et sécurisé
- * Version 2.1 - Ne supprime QUE les vrais commentaires de debug et info
+ * Script de nettoyage intelligent et simplifié
+ * Version 3.0 - Délègue le formatage à Prettier, focus sur la suppression propre
  * 
- * SÉCURITÉS :
- * - Préserve les attributs PHP 8 (#[...])
- * - Préserve les docblocks importants
- * - Préserve les commentaires de licence
- * - Mode dry-run pour tester
+ * PHILOSOPHY: 
+ * - Ce script supprime intelligemment les commentaires de debug
+ * - Prettier gère le formatage et l'espacement
+ * - JSHint valide la syntaxe finale
+ * - Chaque outil fait ce qu'il fait de mieux
  */
 
 class SmartCodeCleaner
 {
-   private array $targetDirectories = [
-    'src/Controller',           
-    'templates',                
-    'assets/js',                // Remplace public/js
-    'assets/scss',              // Remplace public/css
-];
-
-    // Dossiers explicitement exclus du nettoyage
-    private array $excludedDirectories = [
-        '.git',
-        '.github',
-        'vendor',
-        'node_modules',
-        '.phpunit.cache',
-        'var',
-        'bin',
-        'config',
-        'migrations',
+    private array $targetDirectories = [
+        'src/Controller',           
+        'templates',                
+        'assets/js',                
+        'assets/scss',              
     ];
 
-    // Patterns TRÈS spécifiques pour les vrais commentaires de debug et info
-    private array $safeCleaningPatterns = [
+    private array $excludedDirectories = [
+        '.git', '.github', 'vendor', 'node_modules', 
+        '.phpunit.cache', 'var', 'bin', 'config', 'migrations',
+    ];
+
+    // Patterns simplifiés - Prettier corrigera l'espacement
+    private array $cleaningPatterns = [
         'js' => [
-            // Console logs - VERSION SIMPLE : toute ligne avec console.log + mot-clé
-            '/^.*console\.log.*[\'"].*?(debug|test|temp|todo|fixme|info).*$/im',
-            '/^.*console\.(warn|error|info).*[\'"].*?(debug|test|temp).*$/im',
+            // Console logs avec mots-clés de debug
+            '/^.*console\.log\([^)]*[\'"`][^\'"`]*(?:debug|test|temp|todo|fixme|info)[^\'"`]*[\'"`][^)]*\);?\s*$/m',
+            '/^.*console\.(warn|error|info)\([^)]*[\'"`][^\'"`]*(?:debug|test|temp)[^\'"`]*[\'"`][^)]*\);?\s*$/m',
             
-            // Commentaires avec mots-clés de debug et info
-            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
-            '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
-            
-            // Commentaires vides ou très courts
+            // Commentaires avec mots-clés de debug
+            '/\/\/\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+            '/\/\/\s*(?:todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
             '/\/\/\s*$/m',
-            '/\/\/\s{1,3}$/m',
         ],
         
         'php' => [
-            // Commentaires avec mots-clés de debug et info - Version simplifiée et sûre
-            '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
-            '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
-            
-            // Commentaires vides
+            '/\/\/\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+            '/\/\/\s*(?:todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
             '/\/\/\s*$/m',
-            
-            // Commentaires multilignes avec mots-clés debug et info (PRÉSERVE docblocks /**)
-            '/\/\*(?!\*)\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
-            '/\/\*(?!\*)\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
+            '/\/\*(?!\*)\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+            '/\/\*(?!\*)\s*(?:todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
         ],
         
         'css' => [
-            // Commentaires CSS avec mots-clés de debug et info
-            '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
-            '/\/\*\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
+            '/\/\*\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+            '/\/\*\s*(?:todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
+        ],
+        
+        'scss' => [
+            '/\/\*\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
+            '/\/\*\s*(?:todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
+            '/\/\/\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
+            '/\/\/\s*(?:todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
         ],
         
         'twig' => [
-            // Commentaires Twig avec mots-clés de debug et info
-            '/\{\#\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\#\}/m',
-            '/\{\#\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\#\}/m',
-        ],
-        'scss' => [
-        // Commentaires SCSS avec mots-clés de debug et info
-        '/\/\*\s*(TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\*\//m',
-        '/\/\*\s*(todo|fixme|debug|test|temp|info)[\s\S]*?\*\//m',
-        
-        // Commentaires // en SCSS
-        '/\/\/\s*(TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
-        '/\/\/\s*(todo|fixme|debug|test|temp|xxx|hack|info).*$/m',
-    ]
+            '/\{\#\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|INFO)[\s\S]*?\#\}/m',
+            '/\{\#\s*(?:todo|fixme|debug|test|temp|info)[\s\S]*?\#\}/m',
+        ]
     ];
 
     private bool $dryRun = false;
@@ -94,10 +74,11 @@ class SmartCodeCleaner
 
     public function cleanPortfolioCode(): void
     {
-        echo "Smart Code Cleaner v2.1\n";
-        echo "Mode sécurisé : Supprime UNIQUEMENT les commentaires de debug et info\n";
-        echo "Mode : " . ($this->dryRun ? "DRY-RUN (simulation)" : "NETTOYAGE RÉEL") . "\n";
-        echo "Dossiers exclus : " . implode(', ', $this->excludedDirectories) . "\n\n";
+        echo "Smart Code Cleaner v3.0\n";
+        echo "Focus: Suppression propre des commentaires de debug\n";
+        echo "Formatage: Delégué à Prettier\n";
+        echo "Validation: Déléguée à ESLint\n";
+        echo "Mode : " . ($this->dryRun ? "DRY-RUN (simulation)" : "NETTOYAGE RÉEL") . "\n\n";
         
         foreach ($this->targetDirectories as $directory) {
             if (!is_dir($directory)) {
@@ -144,73 +125,92 @@ class SmartCodeCleaner
             $extension = 'twig';
         }
 
-        if (!isset($this->safeCleaningPatterns[$extension])) {
+        if (!isset($this->cleaningPatterns[$extension])) {
             return;
         }
 
         $this->stats['scanned']++;
         
-        // Gestion de l'encodage UTF-8
         $originalContent = file_get_contents($filePath);
         if ($originalContent === false) {
             echo "   ERREUR : Impossible de lire " . $this->getRelativePath($filePath) . "\n";
             return;
         }
         
-        // Assurer l'encodage UTF-8
         if (!mb_check_encoding($originalContent, 'UTF-8')) {
             $originalContent = mb_convert_encoding($originalContent, 'UTF-8', 'auto');
         }
         
-        $cleanedContent = $this->applySmartCleaning($originalContent, $extension);
+        $cleanedContent = $this->applyCleaning($originalContent, $extension);
         
+        // Post-nettoyage minimal - Prettier finalisera
+        $cleanedContent = $this->basicCleanup($cleanedContent);
+        
+        $this->processResults($filePath, $originalContent, $cleanedContent);
+    }
+
+    private function applyCleaning(string $content, string $fileType): string
+    {
+        $cleaned = $content;
+        $totalChanges = 0;
+        
+        foreach ($this->cleaningPatterns[$fileType] as $pattern) {
+            $before = $cleaned;
+            $cleaned = preg_replace($pattern, '', $cleaned);
+            
+            if ($before !== $cleaned) {
+                $totalChanges++;
+                if ($this->dryRun) {
+                    echo "      -> Pattern appliqué (changement detecté)\n";
+                }
+            }
+        }
+        
+        return $cleaned;
+    }
+
+    /**
+     * Nettoyage minimal - Prettier fera le reste
+     */
+    private function basicCleanup(string $content): string
+    {
+        // Supprimer seulement les lignes complètement vides en excès
+        $content = preg_replace('/\n\s*\n\s*\n\s*\n+/', "\n\n\n", $content);
+        
+        // Nettoyer les espaces en fin de ligne
+        $content = preg_replace('/[ \t]+$/m', '', $content);
+        
+        return $content;
+    }
+
+    private function processResults(string $filePath, string $originalContent, string $cleanedContent): void
+    {
         $originalLines = substr_count($originalContent, "\n");
         $cleanedLines = substr_count($cleanedContent, "\n");
         $linesRemoved = $originalLines - $cleanedLines;
         
-        // FIX: Condition corrigée - ne se base plus sur $linesRemoved > 0
         if ($originalContent !== $cleanedContent) {
             if (!$this->dryRun) {
                 file_put_contents($filePath, $cleanedContent);
             }
             
-            // Calculer les caractères supprimés pour un meilleur affichage
             $charactersRemoved = strlen($originalContent) - strlen($cleanedContent);
             
             echo "   " . ($this->dryRun ? "[TEST]" : "[CLEAN]") . " " . 
-                 $this->getRelativePath($filePath) . " (-$charactersRemoved caractères" . 
-                 ($linesRemoved > 0 ? ", -$linesRemoved lignes" : "") . ")\n";
+                 $this->getRelativePath($filePath);
+            
+            if ($charactersRemoved > 0) {
+                echo " (-$charactersRemoved caractères";
+                if ($linesRemoved > 0) {
+                    echo ", -$linesRemoved lignes";
+                }
+                echo ")";
+            }
+            echo "\n";
             
             $this->stats['cleaned']++;
             $this->stats['lines_removed'] += $linesRemoved;
         }
-    }
-
-    private function applySmartCleaning(string $content, string $fileType): string
-    {
-        $cleaned = $content;
-        $originalLength = strlen($content);
-        
-        if (!isset($this->safeCleaningPatterns[$fileType])) {
-            return $cleaned;
-        }
-
-        $totalRemoved = 0;
-        foreach ($this->safeCleaningPatterns[$fileType] as $pattern) {
-            $beforeLength = strlen($cleaned);
-            $cleaned = preg_replace($pattern, '', $cleaned);
-            $afterLength = strlen($cleaned);
-            $totalRemoved += ($beforeLength - $afterLength);
-        }
-
-        if ($totalRemoved > 0) {
-            echo "      → Supprimé $totalRemoved caractères avec patterns $fileType\n";
-        }
-
-        // Nettoyer les lignes vides excessives mais préserver la structure
-        $cleaned = preg_replace('/\n\s*\n\s*\n\s*\n/', "\n\n\n", $cleaned);
-        
-        return $cleaned;
     }
 
     private function getRelativePath(string $filePath): string
@@ -224,22 +224,28 @@ class SmartCodeCleaner
 
     private function showSummary(): void
     {
-        echo "\nRÉSUMÉ DU NETTOYAGE\n";
+        echo "\nRÉSUMÉ DU NETTOYAGE v3.0\n";
+        echo "========================\n";
         echo "   Fichiers analysés : {$this->stats['scanned']}\n";
         echo "   Fichiers nettoyés : {$this->stats['cleaned']}\n";
         echo "   Lignes supprimées : {$this->stats['lines_removed']}\n";
+        echo "\n";
+        echo "   ℹ️  Le formatage sera finalisé par Prettier\n";
+        echo "   ℹ️  La syntaxe sera validée par ESLint\n";
         
         if ($this->dryRun) {
             echo "\nC'était un DRY-RUN ! Aucun fichier n'a été modifié.\n";
-            echo "   Pour appliquer les changements : php scripts/clean-code.php --apply\n";
+            echo "   Pour appliquer : php scripts/clean-code.php --apply\n";
         } else {
             echo "\nNettoyage terminé avec succès !\n";
+            echo "   -> Appliquez Prettier pour finaliser le formatage\n";
+            echo "   -> Lancez JSHint pour valider la syntaxe\n";
         }
     }
 }
 
 // Gestion des arguments
-$dryRun = true; // Par défaut en mode dry-run pour la sécurité
+$dryRun = true;
 
 if (isset($argv[1])) {
     if ($argv[1] === '--apply') {
@@ -247,14 +253,25 @@ if (isset($argv[1])) {
     } elseif ($argv[1] === '--dry-run' || $argv[1] === '--test') {
         $dryRun = true;
     } elseif ($argv[1] === '--help') {
-        echo "Smart Code Cleaner v2.1\n\n";
+        echo "Smart Code Cleaner v3.0\n\n";
+        echo "WORKFLOW INTÉGRÉ avec Prettier + ESLint\n\n";
         echo "Usage:\n";
         echo "  php scripts/clean-code.php           # Mode dry-run (test)\n";
         echo "  php scripts/clean-code.php --apply   # Nettoyage réel\n";
         echo "  php scripts/clean-code.php --test    # Mode dry-run explicite\n";
         echo "  php scripts/clean-code.php --help    # Cette aide\n\n";
-        echo "Supprime UNIQUEMENT les commentaires de debug et info (TODO, FIXME, INFO, etc.)\n";
-        echo "Préserve les attributs PHP 8, docblocks et code important.\n";
+        echo "Workflow recommandé :\n";
+        echo "  1. php scripts/clean-code.php --apply\n";
+        echo "  2. prettier --write 'assets/js/**/*.js'\n";
+        echo "  3. eslint assets/js/**/*.js\n\n";
+        echo "Ou directement via le CI qui automatise tout !\n\n";
+        echo "Fonctionnalités v3.0 :\n";
+        echo "  ✓ Suppression propre des commentaires de debug et info\n";
+        echo "  ✓ Préservation des attributs PHP 8, docblocks et code important\n";
+        echo "  ✓ Patterns optimisés pour console.log debug\n";
+        echo "  ✓ Nettoyage minimal - délègue le formatage à Prettier\n";
+        echo "  ✓ Compatible avec la validation ESLint\n";
+        echo "  ✓ Focus sur la robustesse et la simplicité\n";
         exit(0);
     }
 }
