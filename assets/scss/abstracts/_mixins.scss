@@ -13,8 +13,8 @@
 }
 
 // Hover lift effect
-@mixin hover-lift($distance: 5px, $shadow: $shadow-medium) {
-  transition: transform $transition-normal, box-shadow $transition-normal;
+@mixin hover-lift($distance: 5px, $shadow: variables.$shadow-medium) {
+  transition: transform variables.$transition-normal, box-shadow variables.$transition-normal;
   
   &:hover {
     transform: translateY(-#{$distance});
@@ -24,19 +24,19 @@
 
 // Responsive breakpoints
 @mixin mobile {
-  @media (max-width: #{$mobile}) {
+  @media (max-width: #{variables.$mobile}) {
     @content;
   }
 }
 
 @mixin tablet {
-  @media (max-width: #{$tablet}) {
+  @media (max-width: #{variables.$tablet}) {
     @content;
   }
 }
 
 @mixin desktop {
-  @media (min-width: #{$desktop}) {
+  @media (min-width: #{variables.$desktop}) {
     @content;
   }
 }

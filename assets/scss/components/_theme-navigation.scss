@@ -1,0 +1,171 @@
+// INFO: Styles pour la navigation thématique avec effet 3D interrupteur
+@use "../abstracts/variables";
+@use "../abstracts/mixins";
+
+// INFO: Container des boutons de thèmes (3 premiers boutons)
+.theme-navigation {
+  position: fixed;
+  left: 7.5%; // INFO: Centré entre bord écran et main-container (70% width = 15% margin chaque côté / 2)
+  top: calc(5% + 10vh); // INFO: 5% (nouveau padding-top) + petit décalage pour alignement
+  display: flex;
+  flex-direction: column;
+  gap: variables.$spacing-xs;
+  z-index: 1000; // INFO: Au-dessus du canvas mais sous les modales
+  
+  // INFO: Responsive mobile
+  @include mixins.mobile {
+    left: 5%;
+    gap: 0.4rem;
+    top: calc(5% + 4vh);
+  }
+}
+
+// INFO: Bouton DevNotes positionné à droite
+.devnotes-navigation {
+  position: fixed;
+  right: 7.5%; // INFO: Symétrique avec les boutons de gauche
+  top: calc(5% + 10vh); // INFO: Exactement même position que les autres boutons
+  z-index: 1000;
+  
+  // INFO: Responsive mobile
+  @include mixins.mobile {
+    right: 5%;
+    top: calc(5% + 4vh);
+  }
+}
+
+// INFO: Styles des boutons avec effet 3D d'interrupteur - STYLE UNIFORME
+.theme-btn {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 2px solid #5E5E5E; // INFO: Couleur fixe, ne change jamais
+  border-radius: variables.$border-radius-sm;
+  background: variables.$canvas-background; // INFO: Couleur fixe, ne change jamais
+  cursor: pointer;
+  transition: all variables.$transition-normal;
+  
+  // INFO: Effet 3D de relief (bouton poussoir non cliqué)
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.3),           // Ombre portée
+    0 2px 4px rgba(255, 255, 255, 0.1) inset, // Reflet supérieur
+    0 -2px 4px rgba(0, 0, 0, 0.2) inset;      // Ombre intérieure inférieure
+  
+  // INFO: Centrage de l'icône uniquement
+  @include mixins.flex-center;
+  
+  // INFO: Styles au survol - uniquement changement de taille
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  // INFO: État pressé temporaire
+  &:active {
+    transform: translateY(1px) scale(1.05);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.4),           // Ombre réduite
+      0 1px 2px rgba(0, 0, 0, 0.3) inset;      // Ombre enfoncée
+  }
+  
+  // INFO: État du thème actif - effet bouton enfoncé
+  &--active {
+    transform: translateY(1px);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.4),           // Ombre minimale
+      0 2px 6px rgba(0, 0, 0, 0.4) inset,     // Ombre enfoncée marquée
+      0 -1px 2px rgba(255, 255, 255, 0.05) inset; // Reflet minimal
+    
+    &:hover {
+      transform: translateY(1px) scale(1.05);
+    }
+  }
+  
+  // INFO: États de focus pour l'accessibilité
+  &:focus {
+    outline: none;
+    box-shadow: 
+      0 4px 8px rgba(0, 0, 0, 0.3),
+      0 2px 4px rgba(255, 255, 255, 0.1) inset,
+      0 -2px 4px rgba(0, 0, 0, 0.2) inset,
+      0 0 0 3px rgba(variables.$primary-color, 0.4);
+  }
+  
+  // INFO: Focus pour bouton actif
+  &--active:focus {
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      0 2px 6px rgba(0, 0, 0, 0.4) inset,
+      0 -1px 2px rgba(255, 255, 255, 0.05) inset,
+      0 0 0 3px rgba(variables.$primary-color, 0.4);
+  }
+  
+  // INFO: Responsive mobile - boutons plus petits
+  @include mixins.mobile {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+// INFO: Icône des boutons de thème (Bootstrap Icons)
+.theme-btn__icon {
+  font-size: 1.2rem;
+  display: block;
+  color: variables.$canvas-points; // INFO: Couleur par défaut gris clair
+  
+  // INFO: Transition pour les changements d'icône
+  transition: all variables.$transition-normal;
+  
+  // INFO: Animation subtle au hover - seulement la taille
+  .theme-btn:hover & {
+    transform: scale(1.1);
+  }
+  
+  // INFO: Couleur orange pour les boutons actifs uniquement
+  .theme-btn--active & {
+    color: #ff8c00;
+  }
+  
+  // INFO: Taille adaptée sur mobile
+  @include mixins.mobile {
+    font-size: 1rem;
+  }
+}
+
+// INFO: Animation d'entrée pour les boutons de gauche
+.theme-navigation {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+// INFO: Animation d'entrée pour le bouton de droite
+.devnotes-navigation {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// INFO: États de désactivation pour maintenance ou chargement
+.theme-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
