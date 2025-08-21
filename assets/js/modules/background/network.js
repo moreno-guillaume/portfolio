@@ -1,7 +1,6 @@
 import { CanvasManager } from './canvas-manager.js';
 import { PointGenerator } from './point-generator.js';
 
-
 // INFO: classe principale pour gérer l'animation de fond en réseau de particules
 // INFO: crée un effet visuel de points connectés avec interaction souris
 export class NetworkBackground {
@@ -13,17 +12,21 @@ export class NetworkBackground {
 
 
 
+
         this.canvasManager = new CanvasManager('networkCanvas');
         this.pointGenerator = new PointGenerator(
             this.canvasManager.getWidth(),
             this.canvasManager.getHeight()
         );
 
+
         // INFO: stockage des données d'animation
+
         this.points = [];
         this.connections = [];
         this.animationId = null;
         this.startTime = Date.now();
+
 
 
 
@@ -49,10 +52,12 @@ export class NetworkBackground {
         this.points = this.pointGenerator.generateStrategicPoints();
 
         // INFO: configuration des gestionnaires d'événements pour l'interactivité
+
         this.setupMouseEvents();
         this.setupResizeEvents();
         this.startAnimation();
     }
+
 
 
 
@@ -62,16 +67,20 @@ export class NetworkBackground {
     setupMouseEvents()
     {
         // INFO: suivi en temps réel de la position de la souris dans le document
+
         document.addEventListener('mousemove', (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
             
+
             // DEBUG: monitoring occasionnel des événements souris pour vérifier la responsivité
+
             if (Math.random() < 0.01) { 
                 console.log('debug: position souris mise à jour', { x: e.clientX, y: e.clientY, timestamp: Date.now() });
             }
         });
     }
+
 
     // INFO: gestion du redimensionnement de la fenêtre pour maintenir l'aspect visuel
 
@@ -79,6 +88,7 @@ export class NetworkBackground {
     setupResizeEvents()
     {
         // INFO: recalcul automatique des dimensions lors du redimensionnement
+
         this.canvasManager.onResize(() => {
 
 
@@ -90,10 +100,13 @@ export class NetworkBackground {
                 this.canvasManager.getHeight()
             );
 
+
             // INFO: régénération des points avec les nouvelles dimensions
+
             this.points = this.pointGenerator.generateStrategicPoints();
         });
     }
+
 
 
 
@@ -108,28 +121,35 @@ export class NetworkBackground {
         // INFO: algorithme O(n²) pour calculer toutes les distances entre points
         // TODO: optimiser avec un algorithme spatial comme un quadtree pour de meilleures performances
 
+
         for (let i = 0; i < this.points.length; i++) {
             for (let j = i + 1; j < this.points.length; j++) {
                 const pointA = this.points[i];
                 const pointB = this.points[j];
 
+
                 // INFO: calcul de distance euclidienne standard entre deux points
+
                 const dx = pointA.x - pointB.x;
                 const dy = pointA.y - pointB.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < this.maxDistance) {
+
                     // INFO: calcul d'opacité inversement proportionnelle à la distance
                     let opacity = (1 - distance / this.maxDistance) * 0.5;
 
                     // INFO: calcul de l'influence de la souris sur l'opacité des connexions
+
                     const midX = (pointA.x + pointB.x) / 2;
                     const midY = (pointA.y + pointB.y) / 2;
                     const mouseDistanceToLine = Math.sqrt(
                         Math.pow(this.mouse.x - midX, 2) + Math.pow(this.mouse.y - midY, 2)
                     );
 
+
                     // INFO: effet de surbrillance des connexions proches de la souris
+
                     if (mouseDistanceToLine < this.mouseInfluenceRadius) {
                         const mouseInfluence = 1 - (mouseDistanceToLine / this.mouseInfluenceRadius);
                         opacity += mouseInfluence * 0.3;
@@ -146,11 +166,13 @@ export class NetworkBackground {
             }
         }
         
+
         // DEBUG: surveillance des performances de calcul des connexions
         if (Math.random() < 0.1) { 
 
 
             console.log('debug: connexions calculées', { 
+
 
 
                 total: connectionsCalculated, 
@@ -159,6 +181,7 @@ export class NetworkBackground {
             });
         }
     }
+
 
 
 
@@ -171,6 +194,7 @@ export class NetworkBackground {
         const frameStart = performance.now();
 
         // INFO: mise à jour des positions des points avec influence de la souris
+
         this.pointGenerator.updatePoints(
             this.points,
             this.startTime,
@@ -178,6 +202,7 @@ export class NetworkBackground {
             this.mouseInfluenceRadius,
             this.mouseInfluenceStrength
         );
+
 
         // INFO: calcul des connexions dynamiques entre les points
         this.calculateConnections();
@@ -193,11 +218,14 @@ export class NetworkBackground {
             console.log('debug: performance frame', { 
 
 
+
                 frameTime: frameTime.toFixed(2) + 'ms',
                 fps: Math.round(1000 / frameTime)
             });
 
+
             
+
 
 
             // FIXME: optimiser si le frametime dépasse 16.67ms (60fps)
@@ -206,6 +234,7 @@ export class NetworkBackground {
                 console.warn('debug: frame lente détectée', frameTime + 'ms');
             }
         }
+
 
         // INFO: planification de la prochaine frame d'animation
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -229,12 +258,14 @@ export class NetworkBackground {
         this.animate();
     }
 
+
     // INFO: arrête l'animation en cours et libère les ressources
 
 
     stopAnimation()
     {
         // INFO: annulation de la frame programmée pour stopper le cycle d'animation
+
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
@@ -244,6 +275,7 @@ export class NetworkBackground {
         }
     }
 
+
     // INFO: nettoyage complet de l'instance pour éviter les fuites mémoire
     destroy()
     {
@@ -251,5 +283,6 @@ export class NetworkBackground {
         // INFO: arrêt de l'animation avant destruction
         this.stopAnimation();
         console.log('info: NetworkBackground détruit proprement');
+
     }
 }

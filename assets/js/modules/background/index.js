@@ -1,12 +1,10 @@
-
+// Re-exports pour faciliter les imports
 export { CanvasManager } from './canvas-manager.js';
 export { PointGenerator } from './point-generator.js';
 export { NetworkBackground } from './network.js';
 
-
 export class BackgroundModule {
     constructor(canvasId = 'networkCanvas') {
-
 
         this.canvasId = canvasId;
         this.networkBackground = null;
@@ -17,13 +15,13 @@ export class BackgroundModule {
 
         
         try {
-            
+            // Vérifier que le canvas existe dans le DOM
             const canvas = document.getElementById(this.canvasId);
             if (!canvas) {
                 throw new Error(`Canvas ${this.canvasId} introuvable dans le DOM`);
             }
             
-            
+            // Import dynamique pour éviter les problèmes de dépendances circulaires
             const { NetworkBackground } = await import('./network.js');
             this.networkBackground = new NetworkBackground();
             this.isInitialized = true;
