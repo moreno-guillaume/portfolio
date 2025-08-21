@@ -25,6 +25,12 @@ jobs:
           coverage: xdebug
           tools: composer
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - name: Cache Composer packages
         uses: actions/cache@v3
         with:
@@ -32,8 +38,11 @@ jobs:
           key: composer-${{ hashFiles('composer.lock') }}
           restore-keys: composer-
 
-      - name: Install dependencies
+      - name: Install PHP dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
+
+      - name: Install Node.js dependencies
+        run: npm install
 
       - name: Preview smart cleaning (dry-run)
         run: |
@@ -48,6 +57,11 @@ jobs:
 
       - name: Run PHPUnit tests
         run: php bin/phpunit --coverage-text
+
+      - name: Verify JavaScript syntax before processing
+        run: |
+          echo "🔍 Vérification de la syntaxe JavaScript initiale..."
+          npx eslint assets/js/**/*.js || echo "⚠️ Erreurs de syntaxe détectées - peuvent être corrigées par le nettoyage"
 
 
   auto-cleaning:
@@ -71,6 +85,18 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, xml
 
+      - name: Setup Node.js with tools
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JavaScript tools
+        run: |
+          npm install -g prettier@3.1.0 eslint@8.57.0
+          echo "📦 Outils installés:"
+          echo "   - Prettier: $(prettier --version)"
+          echo "   - ESLint: $(eslint --version)"
+
       - name: Configure Git Bot
         run: |
           git config --local user.email "bot@portfolio.dev"
@@ -88,8 +114,53 @@ jobs:
           echo "🧹 Application du nettoyage intelligent..."
           php scripts/clean-code.php --apply
 
+      - name: Format JavaScript with Prettier
+        run: |
+          echo "🎨 Formatage du JavaScript avec Prettier..."
+          
+          # Configuration Prettier pour votre projet
+          cat > .prettierrc << EOF
+          {
+            "semi": true,
+            "trailingComma": "es5",
+            "singleQuote": true,
+            "tabWidth": 4,
+            "useTabs": false,
+            "printWidth": 100,
+            "bracketSpacing": true,
+            "arrowParens": "avoid"
+          }
+          EOF
+          
+          # Appliquer Prettier sur tous les fichiers JS
+          find assets/js -name "*.js" -type f -exec prettier --write {} +
+          
+          echo "✅ Formatage JavaScript terminé"
+
+      - name: Verify JavaScript syntax
+        id: js_check
+        run: |
+          echo "🔍 Vérification de la syntaxe JavaScript..."
+          
+          # Vérifier tous les fichiers JS avec ESLint
+          js_errors=0
+          if ! npx eslint assets/js/**/*.js; then
+            js_errors=1
+            echo "❌ Erreurs ESLint détectées"
+          fi
+          
+          if [ $js_errors -eq 0 ]; then
+            echo "✅ Tous les fichiers JavaScript respectent les règles ESLint"
+            echo "js_valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Fichiers JavaScript avec des erreurs ESLint"
+            echo "js_valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
       - name: Check and commit changes
         id: changes
+        if: steps.js_check.outputs.js_valid == 'true'
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "found=true" >> $GITHUB_OUTPUT
@@ -97,16 +168,26 @@ jobs:
             echo "📊 RÉSULTATS DU NETTOYAGE :"
             git status --porcelain
             echo ""
+            echo "📈 Statistiques des changements :"
             git diff --stat
+            echo ""
+            echo "🎯 Fichiers JavaScript formatés :"
+            git diff --name-only | grep -E '\.js$' | wc -l | xargs echo "   Fichiers JS modifiés:"
             
             git add -A
-            git commit -m "🧹 [Auto-Clean]: Code nettoyé pour la production
+            git commit -m "🧹 [Auto-Clean]: Code nettoyé et formaté pour la production
 
             📋 Nettoyage automatique appliqué :
             - ✅ Commentaires TODO, DEBUG, INFO supprimés
-            - ✅ Console.log de debug nettoyés
-            - ✅ Code optimisé pour la production
+            - ✅ Console.log de debug nettoyés  
+            - ✅ Code formaté avec Prettier
+            - ✅ Syntaxe JavaScript vérifiée avec ESLint
             - ✅ Branche dev préservée intacte
+            
+            🛠️ Outils utilisés :
+            - Smart Code Cleaner v2.3
+            - Prettier $(prettier --version)
+            - ESLint $(eslint --version)
             
             🤖 Généré automatiquement par GitHub Actions
             🔗 Workflow: ${{ github.run_id }}"
@@ -119,16 +200,26 @@ jobs:
             echo "✅ Code déjà propre - aucun nettoyage nécessaire"
           fi
 
-
-      # 🚀 Création de la PR SANS labels problématiques
+      - name: Handle JavaScript syntax errors
+        if: steps.js_check.outputs.js_valid == 'false'
+        run: |
+          echo "❌ ERREUR : Le nettoyage a généré des erreurs ESLint JavaScript"
+          echo ""
+          echo "🔧 Actions recommandées :"
+          echo "   1. Vérifiez les patterns de nettoyage dans clean-code.php"
+          echo "   2. Testez le nettoyage en local avec: php scripts/clean-code.php --test"
+          echo "   3. Corrigez les patterns problématiques ou ajustez .eslintrc.json"
+          echo ""
+          echo "🛡️ Sécurité : Aucune PR ne sera créée avec du code JavaScript invalide"
+          exit 1
 
       - name: Create Cleaning Pull Request
-        if: steps.changes.outputs.found == 'true'
+        if: steps.changes.outputs.found == 'true' && steps.js_check.outputs.js_valid == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.PORTFOLIO_TOKEN }}
         run: |
           pr_url=$(gh pr create \
-            --title "🧹 [Auto-Clean]: Nettoyage automatique du code de production" \
+            --title "🧹 [Auto-Clean]: Nettoyage et formatage automatique du code" \
             --body "## 🤖 Nettoyage automatique du code
 
           Cette PR a été **créée automatiquement** suite au merge vers main.
@@ -136,58 +227,77 @@ jobs:
           ### 📋 Changements appliqués :
           - 🧹 **Commentaires de développement supprimés** (TODO, DEBUG, INFO, etc.)
           - 🚫 **Console.log de debug nettoyés**
+          - 🎨 **Code JavaScript formaté avec Prettier**
+          - 🔍 **Syntaxe JavaScript vérifiée avec ESLint**
           - ⚡ **Code optimisé pour la production**
-          - 🛡️ **Code critique préservé** (docblocks, attributs PHP, etc.)
+
+          ### 🛠️ Outils utilisés :
+          - **Smart Code Cleaner v2.3** - Suppression intelligente des commentaires
+          - **Prettier $(prettier --version)** - Formatage automatique du JavaScript  
+          - **ESLint $(eslint --version)** - Validation de la syntaxe JavaScript
 
           ### 🔍 Vérifications effectuées :
           - ✅ Attributs PHP 8 conservés (#[Route(...)])
           - ✅ Docblocks de documentation préservés  
           - ✅ Commentaires de configuration maintenus
-          - ✅ Seuls les vrais commentaires de debug supprimés
+          - ✅ Syntaxe JavaScript validée (0 erreur ESLint)
+          - ✅ Code formaté selon les standards Prettier
 
           ### 🎯 Workflow automatisé :
           1. ✅ **Branche dev** → Commentaires préservés pour le développement
           2. ✅ **Merge vers main** → Déclenchement automatique du nettoyage
-          3. ✅ **PR automatique** → Code nettoyé prêt pour la production
-          4. ✅ **Merge de cette PR** → Code de production optimisé
+          3. ✅ **Nettoyage intelligent** → Suppression des commentaires de debug
+          4. ✅ **Formatage Prettier** → Code JavaScript propre et cohérent
+          5. ✅ **Validation ESLint** → Syntaxe JavaScript garantie
+          6. ✅ **PR automatique** → Code prêt pour la production
 
           ### ℹ️ Instructions :
           - 👀 **Reviewez** les changements ci-dessous
           - ✅ **Mergez cette PR** pour appliquer le nettoyage  
-          - 🎉 **C'est tout !** Votre code sera automatiquement propre en production
+          - 🎉 **C'est tout !** Votre code sera automatiquement propre et formaté
 
           ---
           🤖 **Automatisation Portfolio - GitHub Actions**  
           🔗 **Workflow ID:** \`${{ github.run_id }}\`  
-          📅 **Généré le :** \`$(date)\`" \
+          📅 **Généré le :** \`$(date)\`
+          🛠️ **Prettier Config:** Semi: true, Single quotes, 4 spaces, 100 chars" \
             --head "$BRANCH_NAME" \
             --base main)
 
           
-          echo "🎉 PR de nettoyage créée automatiquement !"
+          echo "🎉 PR de nettoyage créée automatiquement avec code JavaScript valide !"
           echo "🔗 URL: $pr_url"
           echo ""
           echo "✅ AUTOMATISATION TERMINÉE"
           echo "👀 Vérifiez et mergez la PR pour finaliser le nettoyage"
 
       - name: Automation Summary
+        if: always()
         run: |
-          echo "🎯 RÉSUMÉ DE L'AUTOMATISATION"
-          echo "=============================="
+          echo "🎯 RÉSUMÉ DE L'AUTOMATISATION v2.0"
+          echo "=================================="
           echo ""
-          if [[ "${{ steps.changes.outputs.found }}" == "true" ]]; then
-            echo "✅ Code nettoyé automatiquement"
+          if [[ "${{ steps.js_check.outputs.js_valid }}" == "true" && "${{ steps.changes.outputs.found }}" == "true" ]]; then
+            echo "✅ Code nettoyé et formaté automatiquement"
+            echo "✅ Syntaxe JavaScript validée (0 erreur ESLint)"
             echo "🔄 PR créée pour review et merge final"
             echo "🎯 Action requise: Mergez la PR de nettoyage"
-          else
-            echo "✅ Code déjà propre"
+          elif [[ "${{ steps.js_check.outputs.js_valid }}" == "false" ]]; then
+            echo "❌ Erreurs ESLint JavaScript détectées"
+            echo "🛡️ PR bloquée pour protéger la production"
+            echo "🎯 Action requise: Corriger les patterns de nettoyage ou ajuster ESLint"
+          elif [[ "${{ steps.changes.outputs.found }}" == "false" ]]; then
+            echo "✅ Code déjà propre et formaté"
             echo "🎯 Aucune action requise"
           fi
           echo ""
-          echo "🛡️ Sécurité:"
+          echo "🛡️ Sécurités actives:"
           echo "   • Dev branch intacte avec tous les commentaires"
           echo "   • Code critique préservé"  
+          echo "   • Syntaxe JavaScript garantie"
+          echo "   • Formatage automatique cohérent"
           echo "   • Review possible avant application"
           echo ""
           echo "🤖 Automatisation: ACTIVE ✅"
-
+          echo "🎨 Formatage automatique: ACTIVE ✅"
+          echo "🔍 Validation ESLint: ACTIVE ✅"
