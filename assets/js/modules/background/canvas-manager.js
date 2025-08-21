@@ -30,6 +30,7 @@ export class CanvasManager {
         if (!colors.background) {
             console.log('debug: variables CSS introuvables, utilisation des couleurs par défaut');
 
+
             colors.background = '#D3DDE4';
             colors.points = '#5E5E5E';
             colors.connections = 'rgba(94, 94, 94, 1)';

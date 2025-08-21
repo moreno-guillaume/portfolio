@@ -55,18 +55,18 @@ $transition-slow: 0.5s ease;
 $glass-blur: 10px;
 $glass-border: 1px solid rgba(255, 255, 255, 1);
 
-// INFO: Variables de couleurs pour le thème
+
 $canvas-background: #e3ecf0; 
 $canvas-points: #5E5E5E;
 $canvas-connections: rgba(94, 94, 94, 1);
 
-// INFO: Export des variables vers CSS custom properties pour JavaScript
+
 :root {
   --canvas-background: #{$canvas-background};
   --canvas-points: #{$canvas-points};
   --canvas-connections: #{$canvas-connections};
   
-  // TODO: ajouter d'autres couleurs thématiques
+  
   --primary-color: #{$primary-color};
   --secondary-color: #{$secondary-color};
   --text-color: #{$text-color};

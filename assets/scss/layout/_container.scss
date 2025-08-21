@@ -1,6 +1,8 @@
+
 /* INFO: Container principal de l'application avec Bootstrap */
 @use "../abstracts/variables";
 @use "../abstracts/mixins";
+
 
 .main-container {
   position: relative;
@@ -9,7 +11,7 @@
   height: 100vh;
   @include mixins.flex-center;
   z-index: variables.$z-content;
-  /* INFO: Permet l'interaction avec le canvas de fond */
+  
   pointer-events: none;
 }
 
@@ -20,7 +22,9 @@
   text-align: center;
   pointer-events: auto;
   
+
   /* INFO: Effet glassmorphism subtil avec Bootstrap classes possibles */
+
   @include mixins.glassmorphism(0.5);
   border-radius: variables.$border-radius-md;
   border: 1px dashed rgba(255, 255, 255, 0.3);
