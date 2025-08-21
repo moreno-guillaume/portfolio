@@ -1,0 +1,51 @@
+// =================================
+// STYLES GLOBAUX DE L'APPLICATION
+// =================================
+
+@use "../abstracts/variables";
+
+// INFO: Styles de base du body
+body {
+  font-family: variables.$font-family-base;
+  line-height: variables.$line-height-relaxed;
+  color: variables.$text-color;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+// INFO: Canvas d'arrière-plan avec animation de particules
+#networkCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: variables.$z-background;
+  pointer-events: none;
+  
+  // INFO: Interaction activée au survol du container pour éviter les conflits
+  &.interactive {
+    pointer-events: auto;
+  }
+}
+
+// INFO: Gestion de l'accessibilité - réduction des animations
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// DEBUG: Grille de debug pour le développement (désactivée)
+// .debug-grid {
+//     background-image: 
+//         linear-gradient(rgba(255,0,0,0.1) 1px, transparent 1px),
+//         linear-gradient(90deg, rgba(255,0,0,0.1) 1px, transparent 1px);
+//     background-size: 20px 20px;
+// }
