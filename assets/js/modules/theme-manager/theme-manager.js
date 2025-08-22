@@ -177,11 +177,11 @@ export class ThemeManager {
     }
 
     toggleDevNotes() {
-    this.isDevNotesActive = !this.isDevNotesActive;
-    this.handleDevNotesToggle(this.isDevNotesActive);
-    this.updateDevNotesButtonState();
-    return this.isDevNotesActive;
-}
+        this.isDevNotesActive = !this.isDevNotesActive;
+        this.handleDevNotesToggle(this.isDevNotesActive);
+        this.updateDevNotesButtonState();
+        return this.isDevNotesActive;
+    }
 
     handleDevNotesToggle(isActive) {
         // Exemples possibles :
