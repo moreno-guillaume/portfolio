@@ -25,7 +25,7 @@ class App {
             // INFO: Initialisation du gestionnaire de thèmes après le background
             await this.initThemeManager();
         } catch (error) {
-            console.error("Erreur lors de l'initialisation de l'application:", error);
+            console.error('Erreur lors de l\'initialisation de l\'application:', error);
         }
     }
 
@@ -41,7 +41,7 @@ class App {
             // INFO: Enregistrement dans la collection des modules
             this.modules.set('background', backgroundModule);
         } catch (error) {
-            console.error("Erreur lors de l'initialisation du module Background:", error);
+            console.error('Erreur lors de l\'initialisation du module Background:', error);
             throw error;
         }
     }
@@ -61,7 +61,7 @@ class App {
             // INFO: Enregistrement du gestionnaire de thèmes
             this.modules.set('themeManager', themeManager);
         } catch (error) {
-            console.error("Erreur lors de l'initialisation du ThemeManager:", error);
+            console.error('Erreur lors de l\'initialisation du ThemeManager:', error);
 
             // INFO: Erreur non-critique, l'application peut fonctionner sans thèmes
             console.warn('info: application continue sans gestionnaire de thèmes');
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // INFO: Création de l'instance globale de l'application
         window.App = new App();
     } catch (error) {
-        console.error("Erreur critique lors du démarrage de l'application:", error);
+        console.error('Erreur critique lors du démarrage de l\'application:', error);
     }
 });
 

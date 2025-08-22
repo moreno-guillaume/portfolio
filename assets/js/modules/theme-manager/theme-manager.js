@@ -74,7 +74,7 @@ export class ThemeManager {
 
             return this;
         } catch (error) {
-            console.error("Erreur lors de l'initialisation du ThemeManager:", error);
+            console.error('Erreur lors de l\'initialisation du ThemeManager:', error);
             this.isInitialized = false;
             throw error;
         }

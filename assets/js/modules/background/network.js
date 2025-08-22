@@ -43,15 +43,6 @@ export class NetworkBackground {
         document.addEventListener('mousemove', e => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
-
-            // DEBUG: Log périodique de la position souris pour vérification
-            if (Math.random() < 0.01) {
-                console.log('debug: position souris mise à jour', {
-                    x: e.clientX,
-                    y: e.clientY,
-                    timestamp: Date.now(),
-                });
-            }
         });
     }
 
@@ -72,7 +63,6 @@ export class NetworkBackground {
     // INFO: Calcul des connexions entre points selon distance et influence souris
     calculateConnections() {
         this.connections = [];
-        let connectionsCalculated = 0;
 
         // INFO: Double boucle pour tester toutes les paires de points
         for (let i = 0; i < this.points.length; i++) {
@@ -107,28 +97,13 @@ export class NetworkBackground {
                         to: j,
                         opacity: Math.min(opacity, 0.8),
                     });
-
-                    connectionsCalculated++;
                 }
             }
-        }
-
-        // DEBUG: Statistiques périodiques des connexions calculées
-        if (Math.random() < 0.1) {
-            console.log('debug: connexions calculées', {
-                total: connectionsCalculated,
-                points: this.points.length,
-                ratio: (
-                    connectionsCalculated /
-                    ((this.points.length * (this.points.length - 1)) / 2)
-                ).toFixed(3),
-            });
         }
     }
 
     // INFO: Boucle principale d'animation avec mesure de performance
     animate() {
-        const frameStart = performance.now();
 
         // INFO: Mise à jour des positions des points avec animation temporelle
         this.pointGenerator.updatePoints(
@@ -144,20 +119,6 @@ export class NetworkBackground {
 
         // INFO: Rendu final sur le canvas
         this.canvasManager.draw(this.connections, this.points);
-
-        // DEBUG: Monitoring des performances de rendu
-        const frameTime = performance.now() - frameStart;
-        if (Math.random() < 0.01) {
-            console.log('debug: performance frame', {
-                frameTime: frameTime.toFixed(2) + 'ms',
-                fps: Math.round(1000 / frameTime),
-            });
-
-            // DEBUG: Alerte si frame trop lente
-            if (frameTime > 16.67) {
-                // TODO: Implémenter optimisation si performance dégradée
-            }
-        }
 
         // INFO: Programmation de la prochaine frame
         this.animationId = requestAnimationFrame(() => this.animate());

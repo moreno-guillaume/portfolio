@@ -34,7 +34,7 @@ export class BackgroundModule {
 
             return this.networkBackground;
         } catch (error) {
-            console.error("Erreur lors de l'initialisation du module Background:", error);
+            console.error('Erreur lors de l\'initialisation du module Background:', error);
             this.isInitialized = false;
             throw error;
         }
