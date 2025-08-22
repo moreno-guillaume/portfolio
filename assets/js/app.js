@@ -1,11 +1,9 @@
 
 import '../scss/app.scss';
 
-import { BackgroundModule } from './modules/background/index.js';
-
-
 // INFO: import du module de gestion du background animé
 import { BackgroundModule } from './modules/background/index.js';
+
 
 // INFO: import du nouveau module de gestion des thèmes
 import { ThemeManager } from './modules/theme-manager/index.js';
