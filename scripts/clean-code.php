@@ -24,12 +24,12 @@ class SmartCodeCleaner
         '.phpunit.cache', 'var', 'bin', 'config', 'migrations',
     ];
 
-    // Patterns simplifiés - Prettier corrigera l'espacement
+    // Patterns améliorés pour gérer les console.log multi-lignes
     private array $cleaningPatterns = [
         'js' => [
-            // Console logs avec mots-clés de debug
-            '/^.*console\.log\([^)]*[\'"`][^\'"`]*(?:debug|test|temp|todo|fixme|info)[^\'"`]*[\'"`][^)]*\);?\s*$/m',
-            '/^.*console\.(warn|error|info)\([^)]*[\'"`][^\'"`]*(?:debug|test|temp)[^\'"`]*[\'"`][^)]*\);?\s*$/m',
+            // Console logs avec mots-clés de debug (version multi-lignes)
+            '/console\.log\s*\(\s*[\'"`][^\'"`]*(?:debug|test|temp|todo|fixme|info)[^\'"`]*[\'"`][\s\S]*?\);?/m',
+            '/console\.(warn|error|info)\s*\(\s*[\'"`][^\'"`]*(?:debug|test|temp)[^\'"`]*[\'"`][\s\S]*?\);?/m',
             
             // Commentaires avec mots-clés de debug
             '/\/\/\s*(?:TODO|FIXME|DEBUG|TEST|TEMP|XXX|HACK|INFO).*$/m',
