@@ -1,6 +1,4 @@
 
-// INFO: Définition des icônes Bootstrap hébergées localement
-// INFO: Remplace le chargement depuis CDN pour éviter les dépendances externes
 
 
 @font-face {
@@ -8,10 +6,9 @@
   src: url("/fonts/bootstrap-icons/bootstrap-icons.woff2?font") format("woff2"),
        url("/fonts/bootstrap-icons/bootstrap-icons.woff?font") format("woff");
 
-  font-display: swap; // INFO: Améliore les performances de chargement
+  font-display: swap;
 }
 
-// INFO: Classes de base pour toutes les icônes Bootstrap
 
 [class^="bi-"]::before,
 [class*=" bi-"]::before {
@@ -28,15 +25,11 @@
 }
 
 
-// INFO: Icônes spécifiques utilisées dans le projet
-
 .bi-sun::before { content: "\f5d2"; }
 .bi-moon::before { content: "\f4c5"; }
 .bi-eye::before { content: "\f31e"; }
 .bi-journal-code::before { content: "\f444"; }
 
-
-// INFO: Icônes supplémentaires couramment utilisées
 
 .bi-house::before { content: "\f423"; }
 .bi-person::before { content: "\f4da"; }
@@ -56,7 +49,5 @@
 .bi-arrow-up::before { content: "\f148"; }
 .bi-arrow-down::before { content: "\f128"; }
 
-
-// TODO: Ajouter d'autres icônes selon les besoins du projet
 
 // Référence complète : https://icons.getbootstrap.com/

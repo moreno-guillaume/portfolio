@@ -5,54 +5,45 @@ export { NetworkBackground } from './network.js';
 
 export class BackgroundModule {
     constructor(canvasId = 'networkCanvas') {
-
         this.canvasId = canvasId;
         this.networkBackground = null;
         this.isInitialized = false;
     }
-    
-    async init() {
 
-        
+    async init() {
         try {
             // Vérifier que le canvas existe dans le DOM
             const canvas = document.getElementById(this.canvasId);
             if (!canvas) {
                 throw new Error(`Canvas ${this.canvasId} introuvable dans le DOM`);
             }
-            
+
             // Import dynamique pour éviter les problèmes de dépendances circulaires
             const { NetworkBackground } = await import('./network.js');
             this.networkBackground = new NetworkBackground();
             this.isInitialized = true;
 
-
             return this.networkBackground;
-            
         } catch (error) {
-            console.error('Erreur lors de l\'initialisation du module Background:', error);
+            console.error("Erreur lors de l'initialisation du module Background:", error);
             this.isInitialized = false;
             throw error;
         }
     }
-    
-    destroy() {
 
-        
+    destroy() {
         if (this.networkBackground && typeof this.networkBackground.destroy === 'function') {
             this.networkBackground.destroy();
         }
-        
+
         this.networkBackground = null;
         this.isInitialized = false;
-        
-
     }
-    
+
     getNetworkBackground() {
         return this.networkBackground;
     }
-    
+
     isReady() {
         return this.isInitialized && this.networkBackground !== null;
     }
