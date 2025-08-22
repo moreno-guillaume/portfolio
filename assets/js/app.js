@@ -1,9 +1,11 @@
 import '../scss/app.scss';
 
+
 // INFO: Import du module de gestion du background animé
 import { BackgroundModule } from './modules/background/index.js';
 
 // INFO: Import du gestionnaire de thèmes pour l'interface utilisateur
+
 import { ThemeManager } from './modules/theme-manager/index.js';
 
 // INFO: Classe principale de l'application gérant l'initialisation et la coordination des modules

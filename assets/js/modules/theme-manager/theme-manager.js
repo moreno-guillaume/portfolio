@@ -217,6 +217,7 @@ export class ThemeManager {
 
     // INFO: Basculement de l'état DevNotes avec mise à jour interface
     toggleDevNotes() {
+
         // INFO: Inversion de l'état actuel des DevNotes
         this.isDevNotesActive = !this.isDevNotesActive;
         
@@ -230,6 +231,7 @@ export class ThemeManager {
     }
 
     // INFO: Gestionnaire des actions lors du toggle DevNotes
+
     handleDevNotesToggle(isActive) {
         // TODO: Implémenter les fonctionnalités DevNotes spécifiques
         // INFO: Exemples d'actions possibles selon l'état
