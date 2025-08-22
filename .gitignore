@@ -34,6 +34,8 @@ Thumbs.db
 # Cache
 /var/cache/
 /var/log/
+/public/var/
+/public/cache/
 
 # Quality tools
 /.php-cs-fixer.cache
