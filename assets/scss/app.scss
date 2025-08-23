@@ -1,17 +1,20 @@
 // =================================
-// APPLICATION STYLES - VERSION SIMPLE
+// APPLICATION STYLES - BOOTSTRAP + CUSTOM
 // =================================
 
-// Abstracts
-@use "abstracts/_variables.scss" ;
-@use "abstracts/_mixins.scss" ;
+// TOUS les @use DOIVENT être en premier (avant toute autre règle)
+@use 'sass:meta';
+@use '../../node_modules/bootstrap/scss/bootstrap';
+@use 'abstracts/variables';
+@use 'abstracts/mixins';
+@use 'base/reset';
+@use 'base/_global';
+@use 'layout/container';
+@use 'components/theme-navigation';
 
-// Base
-@use "base/reset";
+// Bootstrap Icons avec @import car pas de version @use officielle
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Layout uniquement
-@use "layout/container";
-
-// Les components seront réactivés plus tard
-// @import "components/hero";
-// @import "components/navigation";
+// Les autres components seront réactivés plus tard
+// @use "components/hero";
+// @use "components/navigation";

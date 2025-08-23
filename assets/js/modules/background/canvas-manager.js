@@ -1,5 +1,4 @@
 export class CanvasManager {
-
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
@@ -13,11 +12,11 @@ export class CanvasManager {
 
     getThemeColors() {
         const rootStyles = getComputedStyle(document.documentElement);
-        
+
         const colors = {
             background: rootStyles.getPropertyValue('--canvas-background').trim(),
             points: rootStyles.getPropertyValue('--canvas-points').trim(),
-            connections: rootStyles.getPropertyValue('--canvas-connections').trim()
+            connections: rootStyles.getPropertyValue('--canvas-connections').trim(),
         };
 
         if (!colors.background) {
@@ -25,7 +24,7 @@ export class CanvasManager {
             colors.points = '#5E5E5E';
             colors.connections = 'rgba(94, 94, 94, 1)';
         }
-        
+
         return colors;
     }
 
@@ -66,7 +65,7 @@ export class CanvasManager {
 
             this.ctx.beginPath();
             this.ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
-            
+
             this.ctx.fillStyle = this.colors.points;
             this.ctx.fill();
         });
@@ -93,7 +92,7 @@ export class CanvasManager {
     onResize(callback) {
         window.addEventListener('resize', () => {
             this.setupCanvas();
-            
+
             if (typeof callback === 'function') {
                 callback();
             }

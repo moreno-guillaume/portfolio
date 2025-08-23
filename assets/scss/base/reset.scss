@@ -1,39 +1,41 @@
-@use "../abstracts/_variables";
-@use "../abstracts/_mixins" ;
+@use '../abstracts/_variables';
+@use '../abstracts/_mixins';
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-  font-family: variables.$font-family-base;
+html,
+body {
+    height: 100%;
+    font-family: variables.$font-family-base;
 }
 
 body {
-  line-height: variables.$line-height-relaxed;
-  overflow-x: hidden;
-  color: variables.$text-color;
+    line-height: variables.$line-height-relaxed;
+    overflow-x: hidden;
+    color: variables.$text-color;
 }
 
 a {
-  text-decoration: none;
-  color: inherit;
-  transition: variables.$transition-normal;
+    text-decoration: none;
+    color: inherit;
+    transition: variables.$transition-normal;
 }
 
-ul, ol {
-  list-style: none;
+ul,
+ol {
+    list-style: none;
 }
 
 // Canvas background (ton code existant adapté)
 #networkCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #F1F4F7; // Garde ta couleur existante
-  z-index: variables.$z-background;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f1f4f7; // Garde ta couleur existante
+    z-index: variables.$z-background;
 }

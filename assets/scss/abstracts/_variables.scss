@@ -41,6 +41,7 @@ $line-height-relaxed: 1.6;
 // Breakpoints
 $mobile: 480px;
 $tablet: 768px;
+$desktop: 1024px;
 
 // Z-index
 $z-background: 1;
@@ -54,19 +55,16 @@ $transition-slow: 0.5s ease;
 $glass-blur: 10px;
 $glass-border: 1px solid rgba(255, 255, 255, 1);
 
-
-$canvas-background: #e3ecf0; 
-$canvas-points: #5E5E5E;
+$canvas-background: #e3ecf0;
+$canvas-points: #5e5e5e;
 $canvas-connections: rgba(94, 94, 94, 1);
 
-
 :root {
-  --canvas-background: #{$canvas-background};
-  --canvas-points: #{$canvas-points};
-  --canvas-connections: #{$canvas-connections};
-  
-  
-  --primary-color: #{$primary-color};
-  --secondary-color: #{$secondary-color};
-  --text-color: #{$text-color};
+    --canvas-background: #{$canvas-background};
+    --canvas-points: #{$canvas-points};
+    --canvas-connections: #{$canvas-connections};
+
+    --primary-color: #{$primary-color};
+    --secondary-color: #{$secondary-color};
+    --text-color: #{$text-color};
 }

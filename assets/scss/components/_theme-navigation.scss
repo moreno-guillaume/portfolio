@@ -1,0 +1,155 @@
+@use '../abstracts/variables';
+@use '../abstracts/mixins';
+
+.theme-navigation {
+    position: fixed;
+    left: 7.5%;
+    top: calc(5% + 10vh);
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-xs;
+    z-index: 1000;
+
+    @include mixins.mobile {
+        left: 5%;
+        gap: 0.4rem;
+        top: calc(5% + 4vh);
+    }
+}
+
+.devnotes-navigation {
+    position: fixed;
+    right: 7.5%;
+    top: calc(5% + 10vh);
+    z-index: 1000;
+
+    @include mixins.mobile {
+        right: 5%;
+        top: calc(5% + 4vh);
+    }
+}
+
+.theme-btn {
+    width: 50px;
+    height: 50px;
+    padding: 0;
+
+    border: 2px solid #5e5e5e;
+    border-radius: variables.$border-radius-sm;
+    background: variables.$canvas-background;
+    cursor: pointer;
+    transition: all variables.$transition-normal;
+
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        // Ombre portée
+        0 2px 4px rgba(255, 255, 255, 0.1) inset,
+        // Reflet supérieur
+        0 -2px 4px rgba(0, 0, 0, 0.2) inset; // Ombre intérieure inférieure
+
+    @include mixins.flex-center;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+
+    &:active {
+        transform: translateY(1px) scale(1.05);
+        box-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.4),
+            // Ombre réduite
+            0 1px 2px rgba(0, 0, 0, 0.3) inset; // Ombre enfoncée
+    }
+
+    &--active {
+        transform: translateY(1px);
+        box-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.4),
+            // Ombre minimale
+            0 2px 6px rgba(0, 0, 0, 0.4) inset,
+            // Ombre enfoncée marquée
+            0 -1px 2px rgba(255, 255, 255, 0.05) inset; // Reflet minimal
+
+        &:hover {
+            transform: translateY(1px) scale(1.05);
+        }
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 2px 4px rgba(255, 255, 255, 0.1) inset,
+            0 -2px 4px rgba(0, 0, 0, 0.2) inset,
+            0 0 0 3px rgba(variables.$primary-color, 0.4);
+    }
+
+    &--active:focus {
+        box-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.4),
+            0 2px 6px rgba(0, 0, 0, 0.4) inset,
+            0 -1px 2px rgba(255, 255, 255, 0.05) inset,
+            0 0 0 3px rgba(variables.$primary-color, 0.4);
+    }
+
+    @include mixins.mobile {
+        width: 45px;
+        height: 45px;
+    }
+}
+
+.theme-btn__icon {
+    font-size: 1.2rem;
+    display: block;
+    color: variables.$canvas-points;
+
+    transition: all variables.$transition-normal;
+
+    .theme-btn:hover & {
+        transform: scale(1.1);
+    }
+
+    .theme-btn--active & {
+        color: #ff8c00;
+    }
+
+    @include mixins.mobile {
+        font-size: 1rem;
+    }
+}
+
+.theme-navigation {
+    animation: slideInFromLeft 0.3s ease-out;
+}
+
+.devnotes-navigation {
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.theme-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}

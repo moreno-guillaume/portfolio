@@ -2,8 +2,7 @@ import { CanvasManager } from './canvas-manager.js';
 import { PointGenerator } from './point-generator.js';
 
 export class NetworkBackground {
-    constructor()
-    {
+    constructor() {
         this.canvasManager = new CanvasManager('networkCanvas');
         this.pointGenerator = new PointGenerator(
             this.canvasManager.getWidth(),
@@ -15,16 +14,15 @@ export class NetworkBackground {
         this.animationId = null;
         this.startTime = Date.now();
 
-        this.maxDistance = 120; 
-        this.mouse = { x: 0, y: 0 }; 
-        this.mouseInfluenceRadius = 120; 
-        this.mouseInfluenceStrength = 30; 
+        this.maxDistance = 120;
+        this.mouse = { x: 0, y: 0 };
+        this.mouseInfluenceRadius = 120;
+        this.mouseInfluenceStrength = 30;
 
         this.init();
     }
 
-    init()
-    {
+    init() {
         this.points = this.pointGenerator.generateStrategicPoints();
 
         this.setupMouseEvents();
@@ -32,16 +30,14 @@ export class NetworkBackground {
         this.startAnimation();
     }
 
-    setupMouseEvents()
-    {
+    setupMouseEvents() {
         document.addEventListener('mousemove', (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
         });
     }
 
-    setupResizeEvents()
-    {
+    setupResizeEvents() {
         this.canvasManager.onResize(() => {
             this.pointGenerator.updateCanvasDimensions(
                 this.canvasManager.getWidth(),
@@ -52,10 +48,8 @@ export class NetworkBackground {
         });
     }
 
-    calculateConnections()
-    {
+    calculateConnections() {
         this.connections = [];
-        let connectionsCalculated = 0;
 
         for (let i = 0; i < this.points.length; i++) {
             for (let j = i + 1; j < this.points.length; j++) {
@@ -76,26 +70,21 @@ export class NetworkBackground {
                     );
 
                     if (mouseDistanceToLine < this.mouseInfluenceRadius) {
-                        const mouseInfluence = 1 - (mouseDistanceToLine / this.mouseInfluenceRadius);
+                        const mouseInfluence = 1 - mouseDistanceToLine / this.mouseInfluenceRadius;
                         opacity += mouseInfluence * 0.3;
                     }
 
                     this.connections.push({
                         from: i,
                         to: j,
-                        opacity: Math.min(opacity, 0.8) 
+                        opacity: Math.min(opacity, 0.8),
                     });
-                    
-                    connectionsCalculated++;
                 }
             }
         }
     }
 
-    animate()
-    {
-        const frameStart = performance.now();
-
+    animate() {
         this.pointGenerator.updatePoints(
             this.points,
             this.startTime,
@@ -108,30 +97,25 @@ export class NetworkBackground {
 
         this.canvasManager.draw(this.connections, this.points);
 
-        const frameTime = performance.now() - frameStart;
-
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
-    startAnimation()
-    {
+    startAnimation() {
         if (this.animationId) {
             this.stopAnimation();
         }
-        
+
         this.animate();
     }
 
-    stopAnimation()
-    {
+    stopAnimation() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
         }
     }
 
-    destroy()
-    {
+    destroy() {
         this.stopAnimation();
     }
 }
